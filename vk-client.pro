@@ -26,18 +26,20 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        vk_api.cpp \
     loginwindow.cpp \
     messageswindow.cpp \
     dialogwidget.cpp \
-    messagewidget.cpp
+    messagewidget.cpp \
+    longpoll.cpp \
+    vksdk.cpp
 
 HEADERS += \
-        vk_api.h \
     loginwindow.h \
     messageswindow.h \
     dialogwidget.h \
-    messagewidget.h
+    messagewidget.h \
+    longpoll.h \
+    vksdk.h
 
 FORMS += \
     loginwindow.ui \

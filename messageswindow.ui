@@ -136,7 +136,7 @@
               </layout>
              </item>
              <item>
-              <widget class="QWidget" name="widget" native="true"/>
+              <widget class="QWidget" name="spike" native="true"/>
              </item>
             </layout>
            </widget>
@@ -186,7 +186,7 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="dialogIcon">
            <property name="minimumSize">
             <size>
              <width>45</width>
@@ -211,14 +211,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="dialogLabel">
            <property name="text">
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="toolButton_2">
+          <widget class="QToolButton" name="dialogSettings">
            <property name="text">
             <string>...</string>
            </property>
@@ -244,8 +244,11 @@
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
            <layout class="QVBoxLayout" name="messagesLayout">
+            <property name="spacing">
+             <number>0</number>
+            </property>
             <item>
-             <widget class="QWidget" name="widget_2" native="true"/>
+             <widget class="QWidget" name="spike2" native="true"/>
             </item>
            </layout>
           </item>
@@ -281,7 +284,7 @@
           <number>5</number>
          </property>
          <item>
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="attachmentButton">
            <property name="maximumSize">
             <size>
              <width>30</width>
@@ -294,12 +297,12 @@
           </widget>
          </item>
          <item>
-          <widget class="QTextEdit" name="textEdit">
+          <widget class="QTextEdit" name="messageEdit">
            <property name="verticalScrollBarPolicy">
-            <enum>Qt::ScrollBarAlwaysOn</enum>
+            <enum>Qt::ScrollBarAsNeeded</enum>
            </property>
            <property name="horizontalScrollBarPolicy">
-            <enum>Qt::ScrollBarAlwaysOn</enum>
+            <enum>Qt::ScrollBarAsNeeded</enum>
            </property>
            <property name="sizeAdjustPolicy">
             <enum>QAbstractScrollArea::AdjustIgnored</enum>
@@ -310,7 +313,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="sendButton">
            <property name="text">
             <string>Отправить</string>
            </property>

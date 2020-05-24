@@ -12,15 +12,15 @@
 // https://vk.com/dev/methods
 
 
-class vk_api
+class vkSdk
 {
 public:
-	vk_api();
+	vkSdk();
 	QNetworkReply *request(QUrl url);
-	QJsonDocument method(QString api_method, QUrlQuery query);
+	QNetworkRequest method(QString api_method, QUrlQuery query = QUrlQuery());
+
 	bool login( QString username, QString password );
-	QString token;
-	int page_id;
+	void setAuthParams( QString token, int userid);
 
 private:
 	QNetworkAccessManager *networkmanager;
@@ -28,8 +28,10 @@ private:
 	QString client_secret;
 	QString client_id;
 	QString ver;
+	QString access_token;
+	int page_id;
 };
 
-extern vk_api vkapi;
+extern vkSdk vkapi;
 
 #endif // VK_API_H

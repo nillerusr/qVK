@@ -1,23 +1,29 @@
-#include "vk_api.h"
+#include "vksdk.h"
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QEventLoop>
 #include <QFile>
 #include <QDir>
 
-vk_api vkapi;
+vkSdk vkapi;
 
-vk_api::vk_api()
+vkSdk::vkSdk()
 {
 	client_secret = "lxhD8OD7dMsqtXIm5IUY";
 	client_id = "2685278";
 	ver = "5.101";
-	token = "";
+	access_token = "";
 	page_id = 0;
 	networkmanager = new QNetworkAccessManager();
 }
 
-QNetworkReply *vk_api::request(QUrl url)
+void vkSdk::setAuthParams(QString token, int userid)
+{
+	this->access_token = token;
+	this->page_id = userid;
+}
+
+QNetworkReply *vkSdk::request(QUrl url)
 {
 	req.setUrl(url);
 	req.setHeader( QNetworkRequest::UserAgentHeader, "KateMobileAndroid/60.1-60 (Android 5; SDK 21; x86; bruh moment; RU)");
@@ -28,19 +34,16 @@ QNetworkReply *vk_api::request(QUrl url)
 	return reply;
 }
 
-QJsonDocument vk_api::method(QString api_method, QUrlQuery query)
+QNetworkRequest vkSdk::method(QString api_method, QUrlQuery query)
 {
 	QUrl url = QUrl("https://api.vk.com/method/"+api_method);
 	query.addQueryItem("v", ver);
-	query.addQueryItem("access_token", token);
+	query.addQueryItem("access_token", access_token);
 	url.setQuery(query);
-	//qDebug() << token;
-	QByteArray reply = request(url)->readAll();
-	qDebug() << reply;
-	return QJsonDocument::fromJson(reply);
+	return QNetworkRequest(url);
 }
 
-bool vk_api::login(QString username, QString password)
+bool vkSdk::login(QString username, QString password)
 {
 	QUrl url = QUrl("https://oauth.vk.com/token");
 	QUrlQuery query;
@@ -58,7 +61,7 @@ bool vk_api::login(QString username, QString password)
 
 	if (jObj.contains("access_token"))
 	{
-		token = jObj.value("access_token").toString();
+		access_token = jObj.value("access_token").toString();
 		page_id = jObj.value("user_id").toInt();
 
 		QFile file(QDir::currentPath()+"/config.json");

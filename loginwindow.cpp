@@ -1,6 +1,6 @@
 #include "loginwindow.h"
 #include "ui_loginwindow.h"
-#include "vk_api.h"
+#include "vksdk.h"
 #include <QMessageBox>
 #include "messageswindow.h"
 

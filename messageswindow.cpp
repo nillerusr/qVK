@@ -1,7 +1,7 @@
 #include "messageswindow.h"
 #include "ui_messageswindow.h"
 #include "dialogwidget.h"
-#include "vk_api.h"
+#include "vksdk.h"
 #include "messagewidget.h"
 
 MessagesWindow::MessagesWindow(QWidget *parent) :

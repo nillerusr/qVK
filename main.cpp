@@ -1,6 +1,6 @@
 #include "loginwindow.h"
 #include <QApplication>
-#include "vk_api.h"
+#include "vksdk.h"
 #include "messageswindow.h"
 #include <QJsonDocument>
 #include <QFile>
@@ -22,8 +22,7 @@ int main(int argc, char *argv[])
 
 	if (jObj.contains("access_token"))
 	{
-		vkapi.token = jObj.value("access_token").toString();
-		vkapi.page_id = jObj.value("user_id").toInt();
+		vkapi.setAuthParams(jObj.value("access_token").toString(),  jObj.value("user_id").toInt());
 		messagewin = new MessagesWindow();
 		messagewin->show();
 	}
