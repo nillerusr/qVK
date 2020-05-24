@@ -2,6 +2,7 @@
 #define MESSAGESWINDOW_H
 
 #include <QMainWindow>
+#include "longpoll.h"
 
 namespace Ui {
 class MessagesWindow;
@@ -17,6 +18,7 @@ public:
 
 private:
 	Ui::MessagesWindow *ui;
+	LongPoll lp;
 };
 
 #endif // MESSAGESWINDOW_H

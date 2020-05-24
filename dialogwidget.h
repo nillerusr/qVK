@@ -12,6 +12,7 @@ class DialogWidget : public QWidget
 	Q_OBJECT
 
 public:
+	void mousePressEvent ( QMouseEvent * event ) override;
 	explicit DialogWidget(QWidget *parent = nullptr, QString dialognm = "", QString lastmsg = "");
 	~DialogWidget();
 

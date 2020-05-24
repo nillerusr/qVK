@@ -8,6 +8,15 @@
 #include <QNetworkAccessManager>
 #include <QObject>
 
+enum LONGPOLL_EVENTS
+{
+	MESSAGE_NEW = 4,
+	MESSAGE_EDIT = 5,
+	INPUT_MESSAGE_READ = 6,
+	OUTPUT_MESSAGE_READ = 7,
+	UNREAD_DIALOGS_CHANGED = 80
+};
+
 class LongPoll : public QObject
 {
 	Q_OBJECT

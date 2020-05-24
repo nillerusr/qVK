@@ -22,6 +22,7 @@ void LongPoll::requestFinished(QNetworkReply* reply)
 		lp_server = jObj.value("server").toString();
 		lp_key = jObj.value("key").toString();
 		lp_ts = jObj.value("ts").toInt();
+		qDebug() << lp_server;
 		LongPollRequest();
 	}
 	else
