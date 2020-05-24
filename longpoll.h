@@ -25,6 +25,7 @@ public:
 	explicit LongPoll(QObject *parent = nullptr);
 	void getLongPollServer();
 	void LongPollRequest();
+	void ParseLongPollEvents(const QJsonArray &updates);
 
 private:
 	QNetworkAccessManager *_manager;

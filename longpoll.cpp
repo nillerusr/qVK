@@ -48,7 +48,7 @@ void LongPoll::requestFinished(QNetworkReply* reply)
 			lp_ts = jObj.value("ts").toInt();
 
 			// TODO: Parse longpoll reply
-
+			ParseLongPollEvents(jObj.value("updates").toArray());
 			LongPollRequest();
 		}
 	}
@@ -66,4 +66,31 @@ void LongPoll::LongPollRequest()
 	query.addQueryItem("mode", "10");
 	url.setQuery(query);
 	_manager->get(QNetworkRequest(url));
+}
+
+void LongPoll::ParseLongPollEvents(const QJsonArray &updates)
+{
+	for(int i = 0; i < updates.count(); i++)
+	{
+		QJsonArray update = updates.at(i).toArray();
+		switch(update.at(0).toInt())
+		{
+		case MESSAGE_NEW:
+			qDebug() << "longpoll event: MESSAGE_NEW";
+			break;
+		case MESSAGE_EDIT:
+			qDebug() << "longpoll event: MESSAGE_EDIT";
+			break;
+		case OUTPUT_MESSAGE_READ:
+			qDebug() << "longpoll event: OUTPUT_MESSAGE_READ";
+			break;
+		case INPUT_MESSAGE_READ:
+			qDebug() << "longpoll event: INPUT_MESSAGE_READ";
+			break;
+		case UNREAD_DIALOGS_CHANGED:
+			qDebug() << "longpoll event: UNREAD_DIALOGS_CHANGED";
+			break;
+		default: break;
+		}
+	}
 }
