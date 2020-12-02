@@ -115,10 +115,10 @@
          <string/>
         </property>
         <property name="textFormat">
-         <enum>Qt::PlainText</enum>
+         <enum>Qt::RichText</enum>
         </property>
         <property name="scaledContents">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="wordWrap">
          <bool>false</bool>
@@ -140,6 +140,9 @@
         </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::RichText</enum>
         </property>
        </widget>
       </item>
