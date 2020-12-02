@@ -15,24 +15,22 @@ void LongPoll::getLongPollServer()
 
 void LongPoll::requestFinished(QNetworkReply* reply)
 {
-	QJsonDocument jDoc = QJsonDocument::fromJson(reply->readAll());
+	const QJsonObject jObj = QJsonDocument::fromJson(reply->readAll()).object();
 	if (lp_server.isNull() || lp_server.isEmpty())
 	{
-		QJsonObject jObj = jDoc.object().value("response").toObject();
-		lp_server = jObj.value("server").toString();
-		lp_key = jObj.value("key").toString();
-		lp_ts = jObj.value("ts").toInt();
+		lp_server = jObj["response"]["server"].toString();
+		lp_key = jObj["response"]["key"].toString();
+		lp_ts = jObj["response"]["ts"].toInt();
 		qDebug() << lp_server;
 		LongPollRequest();
 	}
 	else
 	{
-		QJsonObject jObj = jDoc.object();
 		if (jObj.contains("failed"))
 		{
-			if (jObj.value("failed").toInt() == 1)
+			if (jObj["failed"].toInt() == 1)
 			{
-				lp_ts = jObj.value("ts").toInt();
+				lp_ts = jObj["ts"].toInt();
 				LongPollRequest();
 			}
 			else
@@ -45,10 +43,10 @@ void LongPoll::requestFinished(QNetworkReply* reply)
 		}
 		else
 		{
-			lp_ts = jObj.value("ts").toInt();
+			lp_ts = jObj["ts"].toInt();
 
 			// TODO: Parse longpoll reply
-			ParseLongPollEvents(jObj.value("updates").toArray());
+			ParseLongPollEvents(jObj["updates"].toArray());
 			LongPollRequest();
 		}
 	}

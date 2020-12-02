@@ -30,6 +30,6 @@ void DialogWidget::mousePressEvent ( QMouseEvent * event )
 			w->setStyleSheet("");
 	}
 
-	this->setStyleSheet("background-color: rgb(200, 200, 200);");
+	this->setStyleSheet("background-color: rgb(100, 100, 255);");
 	dialogLabel->setText(ui->dialogname->text());
 }

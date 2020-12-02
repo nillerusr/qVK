@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>731</width>
-    <height>386</height>
+    <width>1057</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,13 +19,13 @@
      <widget class="QFrame" name="frame_2">
       <property name="minimumSize">
        <size>
-        <width>250</width>
+        <width>400</width>
         <height>0</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>200</width>
+        <width>400</width>
         <height>16777215</height>
        </size>
       </property>
@@ -120,8 +120,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>230</width>
-              <height>311</height>
+              <width>380</width>
+              <height>425</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -237,8 +237,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>453</width>
-           <height>257</height>
+           <width>629</width>
+           <height>371</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">

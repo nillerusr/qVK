@@ -3,6 +3,8 @@
 #include "dialogwidget.h"
 #include "vksdk.h"
 #include "messagewidget.h"
+#include <QObject>
+#include <unistd.h>
 
 MessagesWindow::MessagesWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -10,20 +12,27 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	lp.getLongPollServer();
+	
+	dialogs_manager = new QNetworkAccessManager();
+	QObject::connect(dialogs_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(addDialogs(QNetworkReply*)));
+	dialogs_manager->get(vkapi.method("messages.getConversations"));
+}
 
-	/*
-	 *
-	 * example
-	 *
-	 */
-	for( int i = 0; i < 50; i++)
+void MessagesWindow::addDialogs(QNetworkReply *reply)
+{
+	const QJsonObject jObj = QJsonDocument::fromJson(reply->readAll()).object();
+	if ( !jObj["response"].isUndefined() )
 	{
-		DialogWidget *dialogwidget = new DialogWidget(nullptr, "dialog "+QString::number(i), "lastmessage "+QString::number(i) );
-		ui->dialogsLayout->addWidget(dialogwidget);
-//		messagewidget *mw = new messagewidget(nullptr, "name "+QString::number(i), "message "+QString::number(i)+"\nsasasa\nhahaha\nКИКЕР СОСАТБ", "time "+QString::number(i) );
-//		ui->messagesLayout->addWidget(mw);
+		const QJsonArray items = jObj["response"]["items"].toArray();
+		for(int i = 0; i < items.count(); i++)
+		{
+			QJsonObject conversation = items[i]["conversation"].toObject();
+			QString title = items[i]["conversation"]["chat_settings"]["title"].toString();
+			QString last_msg = items[i]["last_message"]["text"].toString();
+			DialogWidget *dialogwidget = new DialogWidget(nullptr, title, last_msg );
+			ui->dialogsLayout->addWidget(dialogwidget);
+		}
 	}
-
 }
 
 MessagesWindow::~MessagesWindow()

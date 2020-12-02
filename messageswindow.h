@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include "longpoll.h"
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
 namespace Ui {
 class MessagesWindow;
@@ -19,6 +22,10 @@ public:
 private:
 	Ui::MessagesWindow *ui;
 	LongPoll lp;
+	QNetworkAccessManager *dialogs_manager;
+	
+private slots:
+	void addDialogs(QNetworkReply *reply);	
 };
 
 #endif // MESSAGESWINDOW_H
