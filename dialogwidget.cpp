@@ -2,7 +2,7 @@
 #include "ui_dialogwidget.h"
 #include <QWidget>
 
-DialogWidget::DialogWidget(QWidget *parent, QString dialognm, QString lastmsg) :
+DialogWidget::DialogWidget(QWidget *parent, QString dialognm, QString lastmsg, QString unread, QString time) :
 	QWidget(parent),
 	ui(new Ui::DialogWidget)
 {
@@ -10,6 +10,8 @@ DialogWidget::DialogWidget(QWidget *parent, QString dialognm, QString lastmsg) :
 
 	ui->dialogname->setText(dialognm);
 	ui->lastmessage->setText(lastmsg);
+	ui->unread_count->setText(unread);
+	ui->datetime->setText(time);
 }
 
 void DialogWidget::setDialogName(QString name)

@@ -13,7 +13,7 @@ class DialogWidget : public QWidget
 
 public:
 	void mousePressEvent ( QMouseEvent * event ) override;
-	explicit DialogWidget(QWidget *parent = nullptr, QString dialognm = "", QString lastmsg = "");
+	explicit DialogWidget(QWidget *parent = nullptr, QString dialognm = "", QString lastmsg = "", QString unread = "", QString times = "");
 	~DialogWidget();
 
 	void setDialogName(QString name);

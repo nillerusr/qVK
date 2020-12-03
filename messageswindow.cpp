@@ -23,7 +23,8 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 }
 
 void MessagesWindow::addDialogs(QNetworkReply *reply)
-{	
+{
+	QString msg_time;
 	const QJsonObject jObj = QJsonDocument::fromJson(reply->readAll()).object();
 	if ( !jObj["response"].isUndefined() )
 	{
@@ -34,9 +35,21 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 			QJsonObject conversation = items[i]["conversation"].toObject();
 			QString title = items[i]["conversation"]["chat_settings"]["title"].toString();
 			QString last_msg = items[i]["last_message"]["text"].toString();
-			DialogWidget *dialogwidget = new DialogWidget(nullptr, title, last_msg );
+			QString unread = QString::number(items[i]["conversation"]["unread_count"].toInt());
+			
+			QDateTime timestamp;
+			timestamp.setTime_t(items[i]["last_message"]["date"].toInt());
+			QDateTime dateTime = QDateTime::currentDateTime();
+			if( dateTime.date().day() != timestamp.date().day())
+				msg_time = timestamp.toString("dd.MM.yyyy");
+			else
+				msg_time = timestamp.toString("h:m ap");
+			
+			if( unread == "0" ) unread = "";
+			DialogWidget *dialogwidget = new DialogWidget(nullptr, title, last_msg, unread, msg_time );
 			dialogwidget->peer_id = items[i]["conversation"]["peer"]["id"].toInt();
 			dialogwidget->type = items[i]["conversation"]["peer"]["type"].toString();
+			
 			if( dialogwidget->type == "user" )
 			{
 				for( int j = 0; j < profiles.count(); j++)
