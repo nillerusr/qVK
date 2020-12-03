@@ -16,6 +16,10 @@ public:
 	explicit DialogWidget(QWidget *parent = nullptr, QString dialognm = "", QString lastmsg = "");
 	~DialogWidget();
 
+	void setDialogName(QString name);
+	
+	int peer_id;
+	QString type;
 private:
 	Ui::DialogWidget *ui;
 };

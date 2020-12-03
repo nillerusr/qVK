@@ -12,6 +12,11 @@ DialogWidget::DialogWidget(QWidget *parent, QString dialognm, QString lastmsg) :
 	ui->lastmessage->setText(lastmsg);
 }
 
+void DialogWidget::setDialogName(QString name)
+{
+	ui->dialogname->setText(name);
+}
+
 DialogWidget::~DialogWidget()
 {
 	delete ui;
