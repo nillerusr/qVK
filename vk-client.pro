@@ -31,7 +31,8 @@ SOURCES += \
     dialogwidget.cpp \
     messagewidget.cpp \
     longpoll.cpp \
-    vksdk.cpp
+    vksdk.cpp \
+    wscrollarea.cpp
 
 HEADERS += \
     loginwindow.h \
@@ -39,7 +40,8 @@ HEADERS += \
     dialogwidget.h \
     messagewidget.h \
     longpoll.h \
-    vksdk.h
+    vksdk.h \
+    wscrollarea.h
 
 FORMS += \
     loginwindow.ui \

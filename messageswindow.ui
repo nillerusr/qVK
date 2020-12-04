@@ -79,7 +79,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Диалоги</string>
+             <string>ddd</string>
             </property>
            </widget>
           </item>
@@ -96,7 +96,7 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QScrollArea" name="dialogsArea">
+          <widget class="WScrollArea" name="dialogsArea">
            <property name="maximumSize">
             <size>
              <width>16777215</width>
@@ -369,6 +369,14 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>WScrollArea</class>
+   <extends>QScrollArea</extends>
+   <header location="global">wscrollarea.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

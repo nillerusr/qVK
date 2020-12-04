@@ -6,6 +6,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QListWidget>
 
 namespace Ui {
 class MessagesWindow;
