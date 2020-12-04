@@ -25,6 +25,10 @@ private:
 	LongPoll lp;
 	QNetworkAccessManager *dialogs_manager;
 	
+	void requestDialogs(int count, int offset = 0);
+	int m_iCurDialogCount;
+	int m_iDialogCount;
+	
 private slots:
 	void addDialogs(QNetworkReply *reply);
 	void loadupDialogs();

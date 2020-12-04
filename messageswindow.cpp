@@ -17,18 +17,29 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	dialogs_manager = new QNetworkAccessManager();
 	QObject::connect(dialogs_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(addDialogs(QNetworkReply*)));
 	QObject::connect(ui->dialogsArea, SIGNAL(scrolledDown()), this, SLOT(loadupDialogs()));
+
+	m_iCurDialogCount = 0;
+	m_iDialogCount = 0;
+	
+	requestDialogs(30);
+}
+
+
+void MessagesWindow::requestDialogs(int count, int offset)
+{
 	QUrlQuery query
 	{
-		{"extended","1"},
-		{"count", "30"}
+		{"extended", "1"},
+		{"count", QString::number(count)},
+		{"offset", QString::number(offset)}
 	};
-
-	dialogs_manager->get(vkapi.method("messages.getConversations", query));
+	dialogs_manager->get(vkapi.method("messages.getConversations", query));	
 }
 
 void MessagesWindow::loadupDialogs()
 {
-	// TODO: loadup dialogs here
+	if( m_iCurDialogCount < m_iDialogCount )
+		requestDialogs(10, m_iCurDialogCount);
 }
 
 void MessagesWindow::addDialogs(QNetworkReply *reply)
@@ -37,8 +48,10 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 	const QJsonObject jObj = QJsonDocument::fromJson(reply->readAll()).object();
 	if ( !jObj["response"].isUndefined() )
 	{
+		m_iDialogCount = jObj["response"]["count"].toInt();
 		const QJsonArray items = jObj["response"]["items"].toArray();
 		const QJsonArray profiles = jObj["response"]["profiles"].toArray();
+		m_iCurDialogCount += items.count();
 		for(int i = 0; i < items.count(); i++)
 		{
 			QJsonObject conversation = items[i]["conversation"].toObject();
