@@ -14,16 +14,29 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	ui->setupUi(this);
 	lp.getLongPollServer();
 	
+	resizeTimer.setSingleShot( true );
 	dialogs_manager = new QNetworkAccessManager();
 	QObject::connect(dialogs_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(addDialogs(QNetworkReply*)));
 	QObject::connect(ui->dialogsArea, SIGNAL(scrolledDown()), this, SLOT(loadupDialogs()));
+	QObject::connect( &resizeTimer, SIGNAL(timeout()), SLOT(resizeUpdate()) );
 
 	m_iCurDialogCount = 0;
 	m_iDialogCount = 0;
 	
-	requestDialogs(30);
+	requestDialogs(10);
 }
 
+void MessagesWindow::resizeEvent(QResizeEvent *event)
+{
+	resizeTimer.start( 500 );
+	QMainWindow::resizeEvent(event);
+}
+
+void MessagesWindow::resizeUpdate()
+{
+	if( ui->dialogsArea->isScrolledDown() && m_iCurDialogCount < m_iDialogCount )
+		requestDialogs(10, m_iCurDialogCount);
+}
 
 void MessagesWindow::requestDialogs(int count, int offset)
 {
@@ -82,6 +95,11 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 				}
 			}
 			ui->dialogsLayout->addWidget(dialogwidget);
+		}
+		
+		if( ui->dialogsArea->isScrolledDown() && m_iCurDialogCount < m_iDialogCount )
+		{
+			requestDialogs(10, m_iCurDialogCount);
 		}
 	}
 }

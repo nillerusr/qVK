@@ -15,6 +15,9 @@ public:
 	
 	void scrollContentsBy(int dx, int dy);
 	
+	bool isScrolledUp();	
+	bool isScrolledDown();
+	
 signals:
 	void scrolledDown();
 	void scrolledUp();	

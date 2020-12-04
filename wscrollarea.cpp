@@ -11,3 +11,17 @@ void WScrollArea::scrollContentsBy(int dx, int dy)
 	else if( this->verticalScrollBar()->value() == this->verticalScrollBar()->minimum() )
 		emit scrolledUp();
 }
+
+bool WScrollArea::isScrolledDown()
+{
+	if(this->verticalScrollBar()->value() == this->verticalScrollBar()->maximum())
+		return true;
+	return false;
+}
+
+bool WScrollArea::isScrolledUp()
+{
+	if( this->verticalScrollBar()->value() == this->verticalScrollBar()->minimum() )
+		return true;
+	return false;
+}
