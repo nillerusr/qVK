@@ -5,6 +5,7 @@
 #include "messagewidget.h"
 #include <QObject>
 #include <QScroller>
+#include <wscrollarea.h>
 
 MessagesWindow::MessagesWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -15,12 +16,19 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	
 	dialogs_manager = new QNetworkAccessManager();
 	QObject::connect(dialogs_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(addDialogs(QNetworkReply*)));
+	QObject::connect(ui->dialogsArea, SIGNAL(scrolledDown()), this, SLOT(loadupDialogs()));
 	QUrlQuery query
 	{
-		{"extended","1"}
+		{"extended","1"},
+		{"count", "30"}
 	};
-	
+
 	dialogs_manager->get(vkapi.method("messages.getConversations", query));
+}
+
+void MessagesWindow::loadupDialogs()
+{
+	// TODO: loadup dialogs here
 }
 
 void MessagesWindow::addDialogs(QNetworkReply *reply)
@@ -44,7 +52,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 			if( dateTime.date().day() != timestamp.date().day())
 				msg_time = timestamp.toString("dd.MM.yyyy");
 			else
-				msg_time = timestamp.toString("h:m ap");
+				msg_time = timestamp.toString("h:m");
 			
 			DialogWidget *dialogwidget = new DialogWidget(nullptr, title, last_msg, unread, msg_time );
 			dialogwidget->peer_id = items[i]["conversation"]["peer"]["id"].toInt();

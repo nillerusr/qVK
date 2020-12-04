@@ -14,6 +14,10 @@ public:
     {}
 	
 	void scrollContentsBy(int dx, int dy);
+	
+signals:
+	void scrolledDown();
+	void scrolledUp();	
 };
 
 #endif // WSCROLLAREA_H

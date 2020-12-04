@@ -26,7 +26,8 @@ private:
 	QNetworkAccessManager *dialogs_manager;
 	
 private slots:
-	void addDialogs(QNetworkReply *reply);	
+	void addDialogs(QNetworkReply *reply);
+	void loadupDialogs();
 };
 
 #endif // MESSAGESWINDOW_H
