@@ -43,7 +43,6 @@ void LoginWindow::on_loginButton_released()
 		else
 		{
 			messagewin = new MessagesWindow();
-			Msgbox.exec();
 			this->hide();
 			messagewin->show();
 		}

@@ -70,6 +70,13 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
+           <widget class="QToolButton" name="toolButton">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="label">
             <property name="font">
              <font>
@@ -79,14 +86,7 @@
              </font>
             </property>
             <property name="text">
-             <string>ddd</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="toolButton">
-            <property name="text">
-             <string>...</string>
+             <string>Сообщения</string>
             </property>
            </widget>
           </item>
@@ -228,9 +228,15 @@
        </widget>
       </item>
       <item>
-       <widget class="QScrollArea" name="messagesArea">
+       <widget class="WScrollArea" name="messagesArea">
+        <property name="sizeAdjustPolicy">
+         <enum>QAbstractScrollArea::AdjustToContents</enum>
+        </property>
         <property name="widgetResizable">
          <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
         </property>
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
@@ -247,10 +253,17 @@
             <property name="spacing">
              <number>0</number>
             </property>
-            <item>
-             <widget class="QWidget" name="spike2" native="true"/>
-            </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QWidget" name="spike2" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

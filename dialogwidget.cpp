@@ -12,6 +12,7 @@ DialogWidget::DialogWidget(QWidget *parent, QString dialognm, QString lastmsg, i
 	ui->lastmessage->setText(lastmsg);
 	setUnreadCount(unread);
 	ui->datetime->setText(time);
+	peer_id = 0;
 }
 
 void DialogWidget::setDialogName(QString name)
@@ -26,6 +27,11 @@ void DialogWidget::setUnreadCount( int unread )
 		ui->unread_count->hide();
 	else if( ui->unread_count->isHidden() )
 		ui->unread_count->show();
+}
+
+void DialogWidget::setLastMessageText( QString text )
+{
+	ui->lastmessage->setText(text);
 }
 
 DialogWidget::~DialogWidget()
@@ -48,4 +54,5 @@ void DialogWidget::mousePressEvent ( QMouseEvent * event )
 
 	this->setStyleSheet("background-color: rgb(100, 100, 255);");
 	dialogLabel->setText(ui->dialogname->text());
+	emit dialogSelected(this);
 }

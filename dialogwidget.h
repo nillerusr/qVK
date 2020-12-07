@@ -2,6 +2,7 @@
 #define DIALOGWIDGET_H
 
 #include <QWidget>
+#include <QtCore>
 
 namespace Ui {
 class DialogWidget;
@@ -18,10 +19,15 @@ public:
 
 	void setDialogName(QString name);
 	void setUnreadCount( int unread );
+	void setLastMessageText( QString text );
+	
 	int peer_id;
 	QString type;
+	QList<QJsonObject> messages;
 private:
 	Ui::DialogWidget *ui;
+signals:
+	void dialogSelected(DialogWidget *dialog);
 };
 
 #endif // DIALOGWIDGET_H

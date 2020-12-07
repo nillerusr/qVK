@@ -7,6 +7,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QObject>
+#include <QJsonObject>
 
 enum LONGPOLL_EVENTS
 {
@@ -26,14 +27,23 @@ public:
 	void getLongPollServer();
 	void LongPollRequest();
 	void ParseLongPollEvents(const QJsonArray &updates);
-
+	
 private:
 	QNetworkAccessManager *_manager;
+	QNetworkAccessManager *msg_manager;
+	
 	QString lp_server, lp_key;
 	int lp_ts;
+	
+	void getMsg(int message_id);	
 
 private slots:
-	void requestFinished(QNetworkReply* reply);
+	void longpollReply(QNetworkReply* reply);
+	void getMsgReply(QNetworkReply *reply);
+	
+signals:
+	void Message_New( const QJsonObject reply );
+	void Message_Edit();
 };
 
 #endif // LONGPOLL_H

@@ -8,6 +8,7 @@
 #include <QNetworkReply>
 #include <QListWidget>
 #include <QTimer>
+#include "dialogwidget.h"
 
 namespace Ui {
 class MessagesWindow;
@@ -26,16 +27,25 @@ private:
 	Ui::MessagesWindow *ui;
 	LongPoll lp;
 	QNetworkAccessManager *dialogs_manager;
+	QNetworkAccessManager *message_manager;
+	
 	
 	void requestDialogs(int count, int offset = 0);
+	DialogWidget *getDialogById(int peer_id);
+	
 	int m_iCurDialogCount;
 	int m_iDialogCount;
 	QTimer resizeTimer;
+	DialogWidget *active_dialog;
 	
 private slots:
 	void addDialogs(QNetworkReply *reply);
 	void loadupDialogs();
 	void resizeUpdate();
+	void dialogSelected(DialogWidget *dialog);
+	void updateMessages(const QJsonObject messages);
+	void messageSended(QNetworkReply *reply);
+	void on_sendButton_released();
 };
 
 #endif // MESSAGESWINDOW_H
