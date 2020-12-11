@@ -19,14 +19,17 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	resizeTimer.setSingleShot( true );
 	dialogs_manager = new QNetworkAccessManager();
 	message_manager = new QNetworkAccessManager();
+	db = new InfoDatabase(parent);
 
-	QObject::connect(dialogs_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(addDialogs(QNetworkReply*)));
-	QObject::connect(ui->dialogsArea, SIGNAL(scrolledDown()), this, SLOT(loadupDialogs()));
+	QObject::connect(dialogs_manager, SIGNAL(finished(QNetworkReply*)), SLOT(addDialogs(QNetworkReply*)));
+	QObject::connect(ui->dialogsArea, SIGNAL(scrolledDown()), SLOT(loadupDialogs()));
 	QObject::connect( &resizeTimer, SIGNAL(timeout()), SLOT(resizeUpdate()) );
+	QObject::connect( &lp, SIGNAL(Message_New(const QJsonObject)), db, SLOT(slot_updateProfiles(const QJsonObject)) );	
 	QObject::connect( &lp, SIGNAL(Message_New(const QJsonObject)), SLOT(updateMessages(const QJsonObject)) );
-	QObject::connect( message_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(messageSended(QNetworkReply*)));
-	QObject::connect( ui->messageEdit, SIGNAL(sKeyPressEvent(QKeyEvent*)), this, SLOT(TextEditEvent(QKeyEvent*)));
+	QObject::connect( message_manager, SIGNAL(finished(QNetworkReply*)), SLOT(messageSended(QNetworkReply*)));
+	QObject::connect( ui->messageEdit, SIGNAL(sKeyPressEvent(QKeyEvent*)), SLOT(TextEditEvent(QKeyEvent*)));
 	
+
 	m_iCurDialogCount = 0;
 	m_iDialogCount = 0;
 	active_dialog = nullptr;
@@ -67,12 +70,15 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 {
 	QString msg_time;
 	const QJsonObject jObj = QJsonDocument::fromJson(reply->readAll()).object();
+	db->updateProfiles(jObj);
+		
 	if ( !jObj["response"].isUndefined() )
 	{
 		m_iDialogCount = jObj["response"]["count"].toInt();
 		const QJsonArray items = jObj["response"]["items"].toArray();
 		const QJsonArray profiles = jObj["response"]["profiles"].toArray();
 		m_iCurDialogCount += items.count();
+		
 		for(int i = 0; i < items.count(); i++)
 		{
 			QJsonObject conversation = items[i]["conversation"].toObject();
@@ -87,7 +93,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 			if( dateTime.date().day() != timestamp.date().day())
 				msg_time = timestamp.toString("dd.MM.yyyy");
 			else
-				msg_time = timestamp.toString("h:m");
+				msg_time = timestamp.toString("hh:mm");
 
 			QJsonObject message = items[i]["last_message"].toObject();
 			
@@ -100,13 +106,8 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 			
 			if( dialogwidget->type == "user" )
 			{
-				for( int j = 0; j < profiles.count(); j++)
-				{
-					if( profiles[j]["id"].toInt() == dialogwidget->peer_id )
-					{
-						dialogwidget->setDialogName(profiles[j]["first_name"].toString()+" "+profiles[j]["last_name"].toString());
-					}
-				}
+				profile_t profile = db->getProfile( dialogwidget->peer_id );
+				dialogwidget->setDialogName(profile.first_name+" "+profile.last_name);
 			}
 			ui->dialogsLayout->addWidget(dialogwidget);
 		}
@@ -120,7 +121,6 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 
 void MessagesWindow::updateMessages(const QJsonObject messages)
 {
-	qDebug() << QJsonDocument(messages).toJson(QJsonDocument::Compact);
 	DialogWidget *widget = getDialogById(messages["response"]["items"][0]["peer_id"].toInt());
 	if( widget )
 	{
@@ -131,9 +131,20 @@ void MessagesWindow::updateMessages(const QJsonObject messages)
 			const QJsonObject msg = messages["response"]["items"][0].toObject();
 			widget->setLastMessageText(msg["text"].toString());			
 			widget->messages.append(msg);
+			qDebug() << QJsonDocument(msg).toJson();
 			if( active_dialog && active_dialog == widget )
 			{
-				QWidget *message = new messagewidget(this, "gay", msg["text"].toString() , "" );
+				QString msg_time;
+				QDateTime timestamp;
+				timestamp.setTime_t(msg["date"].toInt());
+				QDateTime dateTime = QDateTime::currentDateTime();
+				if( dateTime.date().day() != timestamp.date().day())
+					msg_time = timestamp.toString("dd.MM.yyyy");
+				else
+					msg_time = timestamp.toString("hh:mm");
+				
+				profile_t profile = db->getProfile(msg["from_id"].toInt());
+				QWidget *message = new messagewidget(this, profile.first_name+" "+profile.last_name, msg["text"].toString() , msg_time );
 				ui->messagesLayout->addWidget(message);
 			}
 		}
@@ -180,7 +191,17 @@ void MessagesWindow::dialogSelected(DialogWidget *dialog)
 	
 	for( it = dialog->messages.begin(); it != dialog->messages.end(); it++)
 	{
-		QWidget *message = new messagewidget(this, "gay", (*it)["text"].toString(), "" );
+		profile_t profile = db->getProfile((*it)["from_id"].toInt());
+		QString msg_time;
+		QDateTime timestamp;
+		timestamp.setTime_t((*it)["date"].toInt());
+		QDateTime dateTime = QDateTime::currentDateTime();
+		if( dateTime.date().day() != timestamp.date().day())
+			msg_time = timestamp.toString("dd.MM.yyyy");
+		else
+			msg_time = timestamp.toString("hh:mm");
+		
+		QWidget *message = new messagewidget(this, profile.first_name+" "+profile.last_name, (*it)["text"].toString(), msg_time );
 		ui->messagesLayout->addWidget(message);
 	}
 }
@@ -214,7 +235,7 @@ void MessagesWindow::TextEditEvent(QKeyEvent *event)
 {
 	if( event->type() == QKeyEvent::KeyPress )
 	{		
-		if( event->key() == Qt::Key_Return && (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier) || QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier)))
+		if( event->key() == Qt::Key_Return && !(QGuiApplication::queryKeyboardModifiers() & Qt::ShiftModifier))
 		{
 			if( !active_dialog )
 				return;

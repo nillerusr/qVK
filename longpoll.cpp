@@ -97,20 +97,15 @@ void LongPoll::ParseLongPollEvents(const QJsonArray &updates)
 		switch(update.at(0).toInt())
 		{
 		case MESSAGE_NEW:
-			qDebug() << "longpoll event: MESSAGE_NEW";
 			getMsg(update[1].toInt());
 			break;
 		case MESSAGE_EDIT:
-			qDebug() << "longpoll event: MESSAGE_EDIT";
 			break;
 		case OUTPUT_MESSAGE_READ:
-			qDebug() << "longpoll event: OUTPUT_MESSAGE_READ";
 			break;
 		case INPUT_MESSAGE_READ:
-			qDebug() << "longpoll event: INPUT_MESSAGE_READ";
 			break;
 		case UNREAD_DIALOGS_CHANGED:
-			qDebug() << "longpoll event: UNREAD_DIALOGS_CHANGED";
 			break;
 		default: break;
 		}

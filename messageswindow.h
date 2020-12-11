@@ -9,6 +9,7 @@
 #include <QListWidget>
 #include <QTimer>
 #include "dialogwidget.h"
+#include "database.h"
 
 namespace Ui {
 class MessagesWindow;
@@ -26,6 +27,9 @@ public:
 private:
 	Ui::MessagesWindow *ui;
 	LongPoll lp;
+	
+	InfoDatabase *db;
+	
 	QNetworkAccessManager *dialogs_manager;
 	QNetworkAccessManager *message_manager;
 	

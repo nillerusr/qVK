@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    database.cpp \
         main.cpp \
     loginwindow.cpp \
     messageswindow.cpp \
@@ -32,16 +33,19 @@ SOURCES += \
     messagewidget.cpp \
     longpoll.cpp \
     vksdk.cpp \
-    wscrollarea.cpp
+    wscrollarea.cpp \
+    wtextedit.cpp
 
 HEADERS += \
+    database.h \
     loginwindow.h \
     messageswindow.h \
     dialogwidget.h \
     messagewidget.h \
     longpoll.h \
     vksdk.h \
-    wscrollarea.h
+    wscrollarea.h \
+    wtextedit.h
 
 FORMS += \
     loginwindow.ui \
