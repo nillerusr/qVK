@@ -37,7 +37,7 @@ private:
 	int m_iDialogCount;
 	QTimer resizeTimer;
 	DialogWidget *active_dialog;
-	
+
 private slots:
 	void addDialogs(QNetworkReply *reply);
 	void loadupDialogs();
@@ -46,6 +46,7 @@ private slots:
 	void updateMessages(const QJsonObject messages);
 	void messageSended(QNetworkReply *reply);
 	void on_sendButton_released();
+	void TextEditEvent(QKeyEvent *event);
 };
 
 #endif // MESSAGESWINDOW_H

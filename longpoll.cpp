@@ -74,7 +74,7 @@ void LongPoll::LongPollRequest()
 
 void LongPoll::getMsgReply(QNetworkReply *reply)
 {
-	const QJsonObject object = QJsonDocument::fromJson(reply->readAll()).object();
+	const QJsonObject object = QJsonDocument::fromJson(reply->readAll()).object();	
 	emit Message_New(object);
 }
 
@@ -82,7 +82,8 @@ void LongPoll::getMsg(int message_id)
 {
 	QUrlQuery query
 	{
-		{"message_ids", QString::number(message_id)}
+		{"message_ids", QString::number(message_id)},
+		{"extended", "1"}
 	};
 	
 	msg_manager->get(vkapi.method("messages.getById", query));

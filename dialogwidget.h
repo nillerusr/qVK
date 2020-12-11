@@ -24,6 +24,8 @@ public:
 	int peer_id;
 	QString type;
 	QList<QJsonObject> messages;
+	QList<QJsonObject> profiles;
+	
 private:
 	Ui::DialogWidget *ui;
 signals:

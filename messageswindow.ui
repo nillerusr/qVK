@@ -229,6 +229,12 @@
       </item>
       <item>
        <widget class="WScrollArea" name="messagesArea">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QAbstractScrollArea::AdjustToContents</enum>
         </property>
@@ -244,17 +250,10 @@
            <x>0</x>
            <y>0</y>
            <width>629</width>
-           <height>371</height>
+           <height>386</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <layout class="QVBoxLayout" name="messagesLayout">
-            <property name="spacing">
-             <number>0</number>
-            </property>
-           </layout>
-          </item>
           <item>
            <widget class="QWidget" name="spike2" native="true">
             <property name="sizePolicy">
@@ -265,6 +264,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <layout class="QVBoxLayout" name="messagesLayout">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+           </layout>
+          </item>
          </layout>
         </widget>
        </widget>
@@ -272,7 +278,7 @@
       <item>
        <widget class="QFrame" name="messageFrame">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -280,7 +286,7 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>50</height>
+          <height>20</height>
          </size>
         </property>
         <property name="maximumSize">
@@ -328,7 +334,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QTextEdit" name="messageEdit">
+          <widget class="WTextEdit" name="messageEdit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -338,13 +344,13 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>40</height>
+             <height>25</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>400</height>
+             <height>200</height>
             </size>
            </property>
            <property name="baseSize">
@@ -353,6 +359,9 @@
              <height>40</height>
             </size>
            </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
            <property name="verticalScrollBarPolicy">
             <enum>Qt::ScrollBarAsNeeded</enum>
            </property>
@@ -360,7 +369,7 @@
             <enum>Qt::ScrollBarAsNeeded</enum>
            </property>
            <property name="sizeAdjustPolicy">
-            <enum>QAbstractScrollArea::AdjustIgnored</enum>
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
            </property>
            <property name="lineWrapMode">
             <enum>QTextEdit::WidgetWidth</enum>
@@ -388,6 +397,11 @@
    <extends>QScrollArea</extends>
    <header location="global">wscrollarea.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WTextEdit</class>
+   <extends>QTextEdit</extends>
+   <header location="global">wtextedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -145,6 +145,12 @@
            <property name="text">
             <string/>
            </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+           </property>
           </widget>
          </item>
         </layout>

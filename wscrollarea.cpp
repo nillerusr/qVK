@@ -42,7 +42,6 @@ bool WScrollArea::isScrolledUp()
 void WScrollArea::moveScrollBarToBottom(int min, int max)
 {
     Q_UNUSED(min);
-	qDebug() << isScrolledDown();
 	if( m_bScrollDownNeed && m_bScrolledDown )
 		verticalScrollBar()->setValue(max);
 }

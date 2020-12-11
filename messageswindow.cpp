@@ -7,6 +7,7 @@
 #include <QScroller>
 #include <wscrollarea.h>
 #include "dialogwidget.h"
+#include <QKeyEvent>
 
 MessagesWindow::MessagesWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -24,6 +25,7 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	QObject::connect( &resizeTimer, SIGNAL(timeout()), SLOT(resizeUpdate()) );
 	QObject::connect( &lp, SIGNAL(Message_New(const QJsonObject)), SLOT(updateMessages(const QJsonObject)) );
 	QObject::connect( message_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(messageSended(QNetworkReply*)));
+	QObject::connect( ui->messageEdit, SIGNAL(sKeyPressEvent(QKeyEvent*)), this, SLOT(TextEditEvent(QKeyEvent*)));
 	
 	m_iCurDialogCount = 0;
 	m_iDialogCount = 0;
@@ -86,11 +88,13 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 				msg_time = timestamp.toString("dd.MM.yyyy");
 			else
 				msg_time = timestamp.toString("h:m");
+
+			QJsonObject message = items[i]["last_message"].toObject();
 			
 			DialogWidget *dialogwidget = new DialogWidget(nullptr, title, last_msg, unread, msg_time );
 			dialogwidget->peer_id = items[i]["conversation"]["peer"]["id"].toInt();
 			dialogwidget->type = items[i]["conversation"]["peer"]["type"].toString();		
-			dialogwidget->messages.append(items[i]["last_message"].toObject());
+			dialogwidget->messages.append(message);
 			
 			QObject::connect( dialogwidget, SIGNAL(dialogSelected(DialogWidget *)), SLOT(dialogSelected(DialogWidget *)) );
 			
@@ -129,8 +133,7 @@ void MessagesWindow::updateMessages(const QJsonObject messages)
 			widget->messages.append(msg);
 			if( active_dialog && active_dialog == widget )
 			{
-				bool isScrollNeeded = ui->messagesArea->isScrolledDown();
-				QWidget *message = new messagewidget(this, "some gay", msg["text"].toString() , "" );
+				QWidget *message = new messagewidget(this, "gay", msg["text"].toString() , "" );
 				ui->messagesLayout->addWidget(message);
 			}
 		}
@@ -177,7 +180,7 @@ void MessagesWindow::dialogSelected(DialogWidget *dialog)
 	
 	for( it = dialog->messages.begin(); it != dialog->messages.end(); it++)
 	{
-		QWidget *message = new messagewidget(this, "some gay", (*it)["text"].toString(), "" );
+		QWidget *message = new messagewidget(this, "gay", (*it)["text"].toString(), "" );
 		ui->messagesLayout->addWidget(message);
 	}
 }
@@ -205,4 +208,25 @@ void MessagesWindow::on_sendButton_released()
 	};
 	ui->messageEdit->clear();
     message_manager->get(vkapi.method("messages.send", query));
+}
+
+void MessagesWindow::TextEditEvent(QKeyEvent *event)
+{
+	if( event->type() == QKeyEvent::KeyPress )
+	{		
+		if( event->key() == Qt::Key_Return && (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier) || QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier)))
+		{
+			if( !active_dialog )
+				return;
+			
+			QUrlQuery query
+			{
+				{"message", ui->messageEdit->toPlainText()},
+				{"random_id", "0"},
+				{"peer_id", QString::number(active_dialog->peer_id) }
+			};
+			ui->messageEdit->clear();
+			message_manager->get(vkapi.method("messages.send", query));
+		}
+	}
 }
