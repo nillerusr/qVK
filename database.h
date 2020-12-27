@@ -6,13 +6,6 @@
 #include <QtSql>
 #include <QtNetwork>
 
-class messagesDB
-{
-public:
-	messagesDB();
-	QSqlDatabase db;
-};
-
 struct profile_s {
 	int user_id;
 	QString first_name;

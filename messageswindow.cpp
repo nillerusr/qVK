@@ -20,6 +20,7 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	resizeTimer.setSingleShot( true );
 	dialogs_manager = new QNetworkAccessManager();
 	message_manager = new QNetworkAccessManager();
+	history_manager = new QNetworkAccessManager();
 	db = new InfoDatabase(parent);
 
 	QObject::connect(dialogs_manager, SIGNAL(finished(QNetworkReply*)), SLOT(addDialogs(QNetworkReply*)));
@@ -29,7 +30,8 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	QObject::connect( &lp, SIGNAL(Message_New(const QJsonObject)), SLOT(updateMessages(const QJsonObject)) );
 	QObject::connect( message_manager, SIGNAL(finished(QNetworkReply*)), SLOT(messageSended(QNetworkReply*)));
 	QObject::connect( ui->messageEdit, SIGNAL(sKeyPressEvent(QKeyEvent*)), SLOT(TextEditEvent(QKeyEvent*)));
-	
+	QObject::connect( history_manager, SIGNAL(finished(QNetworkReply*)), SLOT(messageHistory(QNetworkReply*)));
+	QObject::connect( ui->messagesArea, SIGNAL(scrolledUp()), SLOT(loadupMessages()));
 
 	m_iCurDialogCount = 0;
 	m_iDialogCount = 0;
@@ -123,19 +125,28 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 	}
 }
 
-void MessagesWindow::updateMessages(const QJsonObject messages)
+void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 {
-	DialogWidget *widget = getDialogById(messages["response"]["items"][0]["peer_id"].toInt());
-	if( widget )
+	const QJsonArray msgs = messages["response"]["items"].toArray();
+	for(int i = 0; i < msgs.count();i++)
 	{
-		if( !messages["response"]["items"][0].isUndefined() )
+		DialogWidget *widget = getDialogById(messages["response"]["items"][i]["peer_id"].toInt());
+		if( widget )
 		{
-			ui->dialogsLayout->removeWidget(widget);
-			ui->dialogsLayout->insertWidget(0, widget);
-			const QJsonObject msg = messages["response"]["items"][0].toObject();
-			widget->setLastMessageText(msg["text"].toString());			
-			widget->messages.append(msg);
-			qDebug() << QJsonDocument(msg).toJson();
+			const QJsonObject msg = msgs[i].toObject();
+			
+			if(bottom)
+			{
+				ui->dialogsLayout->removeWidget(widget);
+				ui->dialogsLayout->insertWidget(0, widget);
+				widget->setLastMessageText(msg["text"].toString());			
+				widget->messages.append(msg);
+			}
+			else
+			{
+				widget->messages.insert(0, msg);
+			}
+			
 			if( active_dialog && active_dialog == widget )
 			{
 				QString msg_time;
@@ -157,7 +168,10 @@ void MessagesWindow::updateMessages(const QJsonObject messages)
 					name = profile.first_name+" "+profile.last_name;
 				}
 				QWidget *message = new messagewidget(this, name, msg["text"].toString() , msg_time );
-				ui->messagesLayout->addWidget(message);
+				if(bottom)
+					ui->messagesLayout->addWidget(message);
+				else
+					ui->messagesLayout->insertWidget(0, message);
 			}
 		}
 	}
@@ -226,6 +240,7 @@ void MessagesWindow::dialogSelected(DialogWidget *dialog)
 		QWidget *message = new messagewidget(this, name, (*it)["text"].toString(), msg_time );
 		ui->messagesLayout->addWidget(message);
 	}
+	loadupMessages();
 }
 
 MessagesWindow::~MessagesWindow()
@@ -272,4 +287,26 @@ void MessagesWindow::TextEditEvent(QKeyEvent *event)
 			message_manager->get(vkapi.method("messages.send", query));
 		}
 	}
+}
+
+void MessagesWindow::messageHistory(QNetworkReply *reply)
+{
+	const QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+	updateMessages(obj, false);
+}
+
+void MessagesWindow::loadupMessages()
+{
+	if( !active_dialog )
+		return;
+	
+	qDebug() << "ass";
+	QUrlQuery query
+	{
+		{"count", "30"},
+		{"offset", QString::number(active_dialog->messages.count())},
+		{"peer_id", QString::number(active_dialog->peer_id) },
+		{"extended", "1"}
+	};
+	history_manager->get(vkapi.method("messages.getHistory", query));
 }

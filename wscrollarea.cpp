@@ -6,16 +6,25 @@ WScrollArea::WScrollArea( QWidget *parent ) : QScrollArea(parent)
 {
 	QScrollBar* scrollbar = verticalScrollBar();
 	QObject::connect(scrollbar, SIGNAL(rangeChanged(int,int)), this, SLOT(moveScrollBarToBottom(int, int)));
+
 	m_bScrollDownNeed = false;
 	m_bScrolledDown = true;
+	m_bScrolledUp = false;
+	iMaxRange = this->verticalScrollBar()->maximum();
 }
 
 void WScrollArea::scrollContentsBy(int dx, int dy)
 {
+	qDebug() << dy;
 	if(this->verticalScrollBar()->value() == this->verticalScrollBar()->maximum())
 		m_bScrolledDown = true;
 	else
 		m_bScrolledDown = false;
+
+	if(this->verticalScrollBar()->value() == this->verticalScrollBar()->minimum())
+		m_bScrolledUp = true;
+	else
+		m_bScrolledUp = false;
 	
     QScrollArea::scrollContentsBy(dx, dy);
 		
@@ -41,7 +50,12 @@ bool WScrollArea::isScrolledUp()
 
 void WScrollArea::moveScrollBarToBottom(int min, int max)
 {
-    Q_UNUSED(min);
+	if( m_bScrolledUp )
+		this->verticalScrollBar()->setValue(verticalScrollBar()->value()+max-iMaxRange);
+		
+	Q_UNUSED(min);
 	if( m_bScrollDownNeed && m_bScrolledDown )
 		verticalScrollBar()->setValue(max);
+	
+	iMaxRange = max;
 }

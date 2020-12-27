@@ -4,12 +4,14 @@
 InfoDatabase::InfoDatabase(QObject *parent) : QObject(parent)
 {
 	db = QSqlDatabase::addDatabase("QSQLITE");
-	db.setDatabaseName(QDir::currentPath()+"/profiles.db");
+	db.setDatabaseName(QDir::currentPath()+"/info.db");
 	db.open();
 	QSqlQuery query( db );
 	query.prepare("CREATE TABLE IF NOT EXISTS profiles(user_id INT, first_name TINYTEXT, last_name TINYTEXT, photo_100 TEXT)");
 	query.exec();
 	query.prepare("CREATE TABLE IF NOT EXISTS groups(group_id INT, name TINYTEXT, photo_100 TEXT)");
+	query.exec();
+	query.prepare("CREATE TABLE IF NOT EXISTS messages(message_id INT, peer_id INT, json TEXT)");
 	query.exec();
 	db.commit();
 }

@@ -30,8 +30,8 @@ SOURCES += \
     loginwindow.cpp \
     messageswindow.cpp \
     dialogwidget.cpp \
-    messagewidget.cpp \
     longpoll.cpp \
+    messagewidget.cpp \
     vksdk.cpp \
     wscrollarea.cpp \
     wtextedit.cpp
@@ -41,8 +41,8 @@ HEADERS += \
     loginwindow.h \
     messageswindow.h \
     dialogwidget.h \
-    messagewidget.h \
     longpoll.h \
+    messagewidget.h \
     vksdk.h \
     wscrollarea.h \
     wtextedit.h

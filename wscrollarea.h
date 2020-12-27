@@ -19,6 +19,10 @@ public:
 
 	bool m_bScrolledDown;
 	bool m_bScrollDownNeed;
+	bool m_bScrolledUp;
+
+private:
+	int iMaxRange;
 	
 private slots: 
 	void moveScrollBarToBottom(int min, int max);

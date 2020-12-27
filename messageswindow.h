@@ -32,6 +32,7 @@ private:
 	
 	QNetworkAccessManager *dialogs_manager;
 	QNetworkAccessManager *message_manager;
+	QNetworkAccessManager *history_manager;
 	
 	
 	void requestDialogs(int count, int offset = 0);
@@ -45,10 +46,14 @@ private:
 private slots:
 	void addDialogs(QNetworkReply *reply);
 	void loadupDialogs();
+	void loadupMessages();
+	
 	void resizeUpdate();
 	void dialogSelected(DialogWidget *dialog);
-	void updateMessages(const QJsonObject messages);
+	void updateMessages(const QJsonObject messages, bool bottom = true);
 	void messageSended(QNetworkReply *reply);
+	void messageHistory(QNetworkReply *reply);
+	
 	void on_sendButton_released();
 	void TextEditEvent(QKeyEvent *event);
 };

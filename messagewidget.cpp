@@ -7,12 +7,9 @@ messagewidget::messagewidget(QWidget *parent, QString nickname, QString msg, QSt
 {
 	ui->setupUi(this);
 
-	QLabel *labelname = findChild<QLabel*> ("nickname");
-	labelname->setText(nickname);
-	QLabel *messagelabel = findChild<QLabel*> ("message");
-	messagelabel->setText(msg);
-	QLabel *datetimelabel = findChild<QLabel*> ("datetime");
-	datetimelabel->setText(time);
+	ui->nickname->setText(nickname);
+	ui->message->setText(msg);
+	ui->datetime->setText(time);
 }
 
 messagewidget::~messagewidget()
