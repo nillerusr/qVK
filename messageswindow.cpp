@@ -300,7 +300,6 @@ void MessagesWindow::loadupMessages()
 	if( !active_dialog )
 		return;
 	
-	qDebug() << "ass";
 	QUrlQuery query
 	{
 		{"count", "30"},
@@ -308,5 +307,6 @@ void MessagesWindow::loadupMessages()
 		{"peer_id", QString::number(active_dialog->peer_id) },
 		{"extended", "1"}
 	};
+	
 	history_manager->get(vkapi.method("messages.getHistory", query));
 }

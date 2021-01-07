@@ -33,6 +33,7 @@ SOURCES += \
     longpoll.cpp \
     messagewidget.cpp \
     vksdk.cpp \
+    wlabel.cpp \
     wscrollarea.cpp \
     wtextedit.cpp
 
@@ -44,6 +45,7 @@ HEADERS += \
     longpoll.h \
     messagewidget.h \
     vksdk.h \
+    wlabel.h \
     wscrollarea.h \
     wtextedit.h
 

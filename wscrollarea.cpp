@@ -15,7 +15,6 @@ WScrollArea::WScrollArea( QWidget *parent ) : QScrollArea(parent)
 
 void WScrollArea::scrollContentsBy(int dx, int dy)
 {
-	qDebug() << dy;
 	if(this->verticalScrollBar()->value() == this->verticalScrollBar()->maximum())
 		m_bScrolledDown = true;
 	else
