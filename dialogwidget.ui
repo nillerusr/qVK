@@ -64,6 +64,12 @@
      <property name="text">
       <string/>
      </property>
+     <property name="pixmap">
+      <pixmap resource="icons.qrc">:/icons/res/camera_200.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
@@ -213,6 +219,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

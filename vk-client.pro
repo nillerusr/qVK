@@ -26,12 +26,14 @@ CONFIG += c++11
 
 SOURCES += \
     database.cpp \
+    downloadmanager.cpp \
         main.cpp \
     loginwindow.cpp \
     messageswindow.cpp \
     dialogwidget.cpp \
     longpoll.cpp \
     messagewidget.cpp \
+    utils.cpp \
     vksdk.cpp \
     wlabel.cpp \
     wscrollarea.cpp \
@@ -39,11 +41,13 @@ SOURCES += \
 
 HEADERS += \
     database.h \
+    downloadmanager.h \
     loginwindow.h \
     messageswindow.h \
     dialogwidget.h \
     longpoll.h \
     messagewidget.h \
+    utils.h \
     vksdk.h \
     wlabel.h \
     wscrollarea.h \
@@ -59,3 +63,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    icons.qrc

@@ -15,6 +15,11 @@ public:
 	explicit messagewidget(QWidget *parent = nullptr, QString nickname = "", QString msg = "", QString time = "");
 	~messagewidget();
 
+	void setPhoto( QPixmap pix );
+	void setName( QString name );	
+	
+	QString photo;
+	
 private:
 	Ui::messagewidget *ui;
 };

@@ -20,9 +20,10 @@ public:
 	void setDialogName(QString name);
 	void setUnreadCount( int unread );
 	void setLastMessageText( QString text );
+	void setPhoto( QPixmap pix );
 	
 	int peer_id;
-	QString type;
+	QString type, photo;
 	QList<QJsonObject> messages;
 	QList<QJsonObject> profiles;
 	

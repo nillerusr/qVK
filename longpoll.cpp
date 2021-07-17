@@ -82,7 +82,8 @@ void LongPoll::getMsg(int message_id)
 	QUrlQuery query
 	{
 		{"message_ids", QString::number(message_id)},
-		{"extended", "1"}
+		{"extended", "1"},
+		{"fields", "photo_200"}		
 	};
 	
 	msg_manager->get(vkapi.method("messages.getById", query));
@@ -109,4 +110,4 @@ void LongPoll::ParseLongPollEvents(const QJsonArray &updates)
 		default: break;
 		}
 	}
-}
+}	

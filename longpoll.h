@@ -46,4 +46,6 @@ signals:
 	void Message_Edit();
 };
 
+static LongPoll longpoll;
+
 #endif // LONGPOLL_H

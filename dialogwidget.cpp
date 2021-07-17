@@ -56,3 +56,9 @@ void DialogWidget::mousePressEvent ( QMouseEvent * event )
 	dialogLabel->setText(ui->dialogname->text());
 	emit dialogSelected(this);
 }
+
+void DialogWidget::setPhoto(QPixmap pix)
+{
+	ui->photo->setPixmap( pix );
+	ui->photo->setScaledContents( true );
+}

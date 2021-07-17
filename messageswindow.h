@@ -10,6 +10,7 @@
 #include <QTimer>
 #include "dialogwidget.h"
 #include "database.h"
+#include "downloadmanager.h"
 
 namespace Ui {
 class MessagesWindow;
@@ -26,20 +27,19 @@ public:
 	
 private:
 	Ui::MessagesWindow *ui;
-	LongPoll lp;
 	
 	InfoDatabase *db;
 	
 	QNetworkAccessManager *dialogs_manager;
 	QNetworkAccessManager *message_manager;
 	QNetworkAccessManager *history_manager;
-	
+
+	DownloadManager conversation_avatar_loader, message_avatar_loader;
 	
 	void requestDialogs(int count, int offset = 0);
 	DialogWidget *getDialogById(int peer_id);
 	
-	int m_iCurDialogCount;
-	int m_iDialogCount;
+	int m_iCurDialogCount, m_iDialogCount, m_iCurMessagesCount;
 	QTimer resizeTimer;
 	DialogWidget *active_dialog;
 
@@ -53,6 +53,8 @@ private slots:
 	void updateMessages(const QJsonObject messages, bool bottom = true);
 	void messageSended(QNetworkReply *reply);
 	void messageHistory(QNetworkReply *reply);
+	void conversation_avatar_downloaded(QString filename, int error);
+	void message_avatar_downloaded(QString filename, int error);
 	
 	void on_sendButton_released();
 	void TextEditEvent(QKeyEvent *event);

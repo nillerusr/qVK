@@ -16,3 +16,14 @@ messagewidget::~messagewidget()
 {
 	delete ui;
 }
+
+void messagewidget::setPhoto(QPixmap pix)
+{
+	ui->photo->setPixmap( pix );
+	ui->photo->setScaledContents( true );
+}
+
+void messagewidget::setName(QString name)
+{
+	ui->nickname->setText(name);
+}
