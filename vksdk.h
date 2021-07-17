@@ -11,7 +11,6 @@
 // Documentation
 // https://vk.com/dev/methods
 
-
 class vkSdk
 {
 public:
@@ -19,7 +18,7 @@ public:
 	QNetworkReply *request(QUrl url);
 	QNetworkRequest method(QString api_method, QUrlQuery query = QUrlQuery());
 
-	bool login( QString username, QString password );
+	const QJsonObject login( QString username, QString password, QString captcha = "");
 	void setAuthParams( QString token, int userid);
 
 private:
@@ -29,6 +28,7 @@ private:
 	QString client_id;
 	QString ver;
 	QString access_token;
+	QString captcha_sid;
 	int page_id;
 };
 

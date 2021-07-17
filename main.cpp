@@ -6,6 +6,9 @@
 #include <QFile>
 #include <QDir>
 #include <QJsonObject>
+#include <QCommonStyle>
+#include <QStylePainter>
+#include "diagnosticstyle.h"
 
 int main(int argc, char *argv[])
 {
@@ -20,6 +23,8 @@ int main(int argc, char *argv[])
 	QJsonDocument jDoc = QJsonDocument::fromJson(file.readAll());
 	QJsonObject jObj = jDoc.object();
 
+//	a.setStyle(new DiagnosticStyle());
+	
 	if (jObj.contains("access_token"))
 	{
 		vkapi.setAuthParams(jObj.value("access_token").toString(),  jObj.value("user_id").toInt());
@@ -27,9 +32,7 @@ int main(int argc, char *argv[])
 		messagewin->show();
 	}
 	else
-	{
 		loginwin.show();
-	}
-
+	
 	return a.exec();
 }

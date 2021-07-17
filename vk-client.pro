@@ -26,6 +26,7 @@ CONFIG += c++11
 
 SOURCES += \
     database.cpp \
+    diagnosticstyle.cpp \
     downloadmanager.cpp \
         main.cpp \
     loginwindow.cpp \
@@ -41,6 +42,7 @@ SOURCES += \
 
 HEADERS += \
     database.h \
+    diagnosticstyle.h \
     downloadmanager.h \
     loginwindow.h \
     messageswindow.h \
