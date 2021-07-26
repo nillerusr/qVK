@@ -1,5 +1,5 @@
 #include "longpoll.h"
-#include "vksdk.h"
+#include "vk.h"
 #include <QObject>
 
 LongPoll::LongPoll(QObject *parent) : QObject(parent)
@@ -110,4 +110,4 @@ void LongPoll::ParseLongPollEvents(const QJsonArray &updates)
 		default: break;
 		}
 	}
-}	
+}

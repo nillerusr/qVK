@@ -6,8 +6,7 @@
 
 QT       += core gui network sql
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets widgets-private
 TARGET = vk-client
 TEMPLATE = app
 
@@ -25,39 +24,43 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-    database.cpp \
-    downloadmanager.cpp \
-        main.cpp \
-    loginwindow.cpp \
-    messageswindow.cpp \
-    dialogwidget.cpp \
-    longpoll.cpp \
-    messagewidget.cpp \
-    utils.cpp \
-    vksdk.cpp \
-    wlabel.cpp \
-    wscrollarea.cpp \
-    wtextedit.cpp
+    customwidgets/dialogwidget.cpp \
+    customwidgets/messagewidget.cpp \
+    customwidgets/wscrollarea.cpp \
+    customwidgets/wtextbrowser.cpp \
+    customwidgets/wtextedit.cpp \
+    wins/loginwindow.cpp \
+    wins/messageswindow.cpp \
+    utils/diagnosticstyle.cpp \
+    utils/downloadmanager.cpp \
+    utils/longpoll.cpp \
+    utils/utils.cpp \
+    utils/vk.cpp \
+    main.cpp \
+    unused/database.cpp
+
 
 HEADERS += \
-    database.h \
-    downloadmanager.h \
-    loginwindow.h \
-    messageswindow.h \
-    dialogwidget.h \
-    longpoll.h \
-    messagewidget.h \
-    utils.h \
-    vksdk.h \
-    wlabel.h \
-    wscrollarea.h \
-    wtextedit.h
+    customwidgets/dialogwidget.h \
+    customwidgets/messagewidget.h \
+    customwidgets/wscrollarea.h \
+    customwidgets/wtextbrowser.h \
+    customwidgets/wtextedit.h \
+    wins/loginwindow.h \
+    wins/messageswindow.h \
+    utils/diagnosticstyle.h \
+    utils/downloadmanager.h \
+    utils/longpoll.h \
+    utils/utils.h \
+    utils/vk.h \
+    unused/database.h
+
 
 FORMS += \
-    loginwindow.ui \
-    messageswindow.ui \
-    dialogwidget.ui \
-    messagewidget.ui
+    wins/loginwindow.ui \
+    wins/messageswindow.ui \
+    customwidgets/dialogwidget.ui \
+    customwidgets/messagewidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

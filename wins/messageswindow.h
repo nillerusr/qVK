@@ -2,15 +2,15 @@
 #define MESSAGESWINDOW_H
 
 #include <QMainWindow>
-#include "longpoll.h"
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QListWidget>
 #include <QTimer>
-#include "dialogwidget.h"
-#include "database.h"
-#include "downloadmanager.h"
+#include "customwidgets/dialogwidget.h"
+//#include "database.h"
+#include "utils/downloadmanager.h"
+#include "utils/longpoll.h"
 
 namespace Ui {
 class MessagesWindow;
@@ -28,7 +28,7 @@ public:
 private:
 	Ui::MessagesWindow *ui;
 	
-	InfoDatabase *db;
+//	InfoDatabase *db;
 	
 	QNetworkAccessManager *dialogs_manager;
 	QNetworkAccessManager *message_manager;

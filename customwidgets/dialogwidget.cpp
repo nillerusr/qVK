@@ -1,6 +1,7 @@
 #include "dialogwidget.h"
 #include "ui_dialogwidget.h"
 #include <QWidget>
+#include <QPainter>
 
 DialogWidget::DialogWidget(QWidget *parent, QString dialognm, QString lastmsg, int unread, QString time) :
 	QWidget(parent),

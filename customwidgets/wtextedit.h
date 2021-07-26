@@ -13,10 +13,12 @@ class WTextEdit : public QTextEdit
 
 public:
 	WTextEdit(QWidget *parent = nullptr);
-	void keyPressEvent(QKeyEvent *event);
 signals:
 	void sKeyPressEvent(QKeyEvent *event);	
 private:
+	virtual void showEvent(QShowEvent *event) override;
+	virtual void keyPressEvent(QKeyEvent *event) override;
+
 	int maxHeight;
 };
 

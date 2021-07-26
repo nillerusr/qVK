@@ -1,5 +1,8 @@
 #include "messagewidget.h"
 #include "ui_messagewidget.h"
+#include <QPainterPath>
+#include <QPainter>
+#include <QScrollBar>
 
 messagewidget::messagewidget(QWidget *parent, QString nickname, QString msg, QString time) :
 	QFrame(parent),

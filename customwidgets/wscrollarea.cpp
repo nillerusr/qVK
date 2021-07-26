@@ -5,7 +5,7 @@
 WScrollArea::WScrollArea( QWidget *parent ) : QScrollArea(parent)
 {
 	QScrollBar* scrollbar = verticalScrollBar();
-	QObject::connect(scrollbar, SIGNAL(rangeChanged(int,int)), this, SLOT(moveScrollBarToBottom(int, int)));
+	connect(scrollbar, SIGNAL(rangeChanged(int,int)), this, SLOT(moveScrollBarToBottom(int, int)));
 
 	m_bScrollDownNeed = false;
 	m_bScrolledDown = true;

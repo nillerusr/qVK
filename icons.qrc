@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/icons">
         <file>res/camera_200.png</file>
+        <file>res/send.svg</file>
+        <file>res/settings.svg</file>
+        <file>res/attach.svg</file>
     </qresource>
 </RCC>

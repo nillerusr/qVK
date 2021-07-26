@@ -1,16 +1,15 @@
 #include "messageswindow.h"
 #include "ui_messageswindow.h"
-#include "dialogwidget.h"
-#include "vksdk.h"
-#include "messagewidget.h"
 #include <QObject>
 #include <QScroller>
-#include <wscrollarea.h>
-#include "dialogwidget.h"
 #include <QKeyEvent>
 #include <QtMath>
-#include "utils.h"
-#include "longpoll.h"
+#include "utils/utils.h"
+#include "utils/longpoll.h"
+#include "utils/vk.h"
+#include "customwidgets/messagewidget.h"
+#include "customwidgets/dialogwidget.h"
+#include "customwidgets/wscrollarea.h"
 
 MessagesWindow::MessagesWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -23,12 +22,12 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	dialogs_manager = new QNetworkAccessManager();
 	message_manager = new QNetworkAccessManager();
 	history_manager = new QNetworkAccessManager();
-	db = new InfoDatabase(parent);
+//	db = new InfoDatabase(parent);
 
 	connect(dialogs_manager, SIGNAL(finished(QNetworkReply*)), SLOT(addDialogs(QNetworkReply*)));
 	connect(ui->dialogsArea, SIGNAL(scrolledDown()), SLOT(loadupDialogs()));
 	connect( &resizeTimer, SIGNAL(timeout()), SLOT(resizeUpdate()) );
-	connect( &longpoll, SIGNAL(Message_New(const QJsonObject)), db, SLOT(slot_update(const QJsonObject)) );	
+//	connect( &longpoll, SIGNAL(Message_New(const QJsonObject)), db, SLOT(slot_update(const QJsonObject)) );	
 	connect( &longpoll, SIGNAL(Message_New(const QJsonObject)), SLOT(updateMessages(const QJsonObject)) );
 	connect( message_manager, SIGNAL(finished(QNetworkReply*)), SLOT(messageSended(QNetworkReply*)));
 	connect( ui->messageEdit, SIGNAL(sKeyPressEvent(QKeyEvent*)), SLOT(TextEditEvent(QKeyEvent*)));
@@ -36,13 +35,12 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	connect( ui->messagesArea, SIGNAL(scrolledUp()), SLOT(loadupMessages()));
 	connect( &conversation_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(conversation_avatar_downloaded(QString, int)) );
 	connect( &message_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(message_avatar_downloaded(QString, int)) );
-
 	
 	m_iCurDialogCount = 0;
 	m_iCurMessagesCount = 0;
 	m_iDialogCount = 0;
 	active_dialog = nullptr;
-	requestDialogs(10);
+	requestDialogs(5);
 	ui->messagesArea->m_bScrollDownNeed = true;
 	
 	conversation_avatar_loader.setDownloadDirectory(".image_previews");
@@ -411,7 +409,7 @@ MessagesWindow::~MessagesWindow()
 	delete ui;
 }
 
-void MessagesWindow::messageSended(QNetworkReply* reply)
+void MessagesWindow::messageSended(QNetworkReply*)
 {
 
 }
