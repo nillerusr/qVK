@@ -40,7 +40,7 @@ DialogWidget::~DialogWidget()
 	delete ui;
 }
 
-void DialogWidget::mousePressEvent ( QMouseEvent * event )
+void DialogWidget::mousePressEvent ( QMouseEvent * )
 {
 	QWidget *win = this->window();
 	QLayout *layout = win->findChild<QLayout*>("dialogsLayout");

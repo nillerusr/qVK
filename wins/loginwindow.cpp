@@ -27,6 +27,10 @@ LoginWindow::~LoginWindow()
 
 void LoginWindow::captcha_img_downloaded(QString filename, int error)
 {
+	Q_UNUSED(error);
+	// TODO: check for errors.
+	// Hmm, I should start redownload in DownloadManager class
+
 	QPixmap pix;
 	if( pix.load(filename) )
 	{
@@ -50,7 +54,7 @@ void LoginWindow::tryLogin()
 	else
 	{
 		const QJsonObject error = vkapi.login(username, passwd, captchaEdit->text());
-		if( !error.isEmpty() )
+		if( !error.isEmpty()  )
 		{
 			if( error["error"] == "need_validation") // TODO: 2FA Auth
 			{
@@ -93,5 +97,5 @@ void LoginWindow::on_loginButton_released()
 
 void LoginWindow::on_cancelButton_released()
 {
-	qApp->quit();    
+	qApp->quit();
 }

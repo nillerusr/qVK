@@ -17,17 +17,15 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	longpoll.getLongPollServer();
-	
+
 	resizeTimer.setSingleShot( true );
 	dialogs_manager = new QNetworkAccessManager();
 	message_manager = new QNetworkAccessManager();
 	history_manager = new QNetworkAccessManager();
-//	db = new InfoDatabase(parent);
 
-	connect(dialogs_manager, SIGNAL(finished(QNetworkReply*)), SLOT(addDialogs(QNetworkReply*)));
-	connect(ui->dialogsArea, SIGNAL(scrolledDown()), SLOT(loadupDialogs()));
+	connect( dialogs_manager, SIGNAL(finished(QNetworkReply*)), SLOT(addDialogs(QNetworkReply*)));
+	connect( ui->dialogsArea, SIGNAL(scrolledDown()), SLOT(loadupDialogs()));
 	connect( &resizeTimer, SIGNAL(timeout()), SLOT(resizeUpdate()) );
-//	connect( &longpoll, SIGNAL(Message_New(const QJsonObject)), db, SLOT(slot_update(const QJsonObject)) );	
 	connect( &longpoll, SIGNAL(Message_New(const QJsonObject)), SLOT(updateMessages(const QJsonObject)) );
 	connect( message_manager, SIGNAL(finished(QNetworkReply*)), SLOT(messageSended(QNetworkReply*)));
 	connect( ui->messageEdit, SIGNAL(sKeyPressEvent(QKeyEvent*)), SLOT(TextEditEvent(QKeyEvent*)));
@@ -35,22 +33,27 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	connect( ui->messagesArea, SIGNAL(scrolledUp()), SLOT(loadupMessages()));
 	connect( &conversation_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(conversation_avatar_downloaded(QString, int)) );
 	connect( &message_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(message_avatar_downloaded(QString, int)) );
-	
+
 	m_iCurDialogCount = 0;
 	m_iCurMessagesCount = 0;
 	m_iDialogCount = 0;
 	active_dialog = nullptr;
 	requestDialogs(5);
 	ui->messagesArea->m_bScrollDownNeed = true;
-	
+
 	conversation_avatar_loader.setDownloadDirectory(".image_previews");
 	message_avatar_loader.setDownloadDirectory(".image_previews");
+}
+
+MessagesWindow::~MessagesWindow()
+{
+	delete ui;
 }
 
 void MessagesWindow::conversation_avatar_downloaded(QString filename, int error)
 {
 	DialogWidget *d = nullptr;
-	
+
 	if( !error )
 	{
 		QStringList l = filename.split("/");
@@ -76,12 +79,12 @@ void MessagesWindow::message_avatar_downloaded(QString filename, int error)
 	{
 		if( !pix.load(filename) )
 			return;
-		
+
 		QStringList l = filename.split("/");
 		for( int i = 0; i < ui->messagesLayout->count(); i++)
 		{
 			messagewidget *m = qobject_cast<messagewidget*>(ui->messagesLayout->itemAt(i)->widget());
-			
+
 			if( m && m->photo == l.last() )
 				m->setPhoto(pix);
 		}
@@ -123,9 +126,8 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 {
 	QString msg_time, img_url;
 	QPixmap pix;
-	
+
 	const QJsonObject jObj = QJsonDocument::fromJson(reply->readAll()).object();
-//	db->update(jObj);
 
 	if ( !jObj["response"].isUndefined() )
 	{
@@ -141,38 +143,27 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 
 			QString title = items[i]["conversation"]["chat_settings"]["title"].toString();
 			QString last_msg = items[i]["last_message"]["text"].toString();
-			
+
 			int unread = items[i]["conversation"]["unread_count"].toInt();
-			
-			msg_time = UTIL_TimestampToQStr(items[i]["last_message"]["date"].toInt());
+
+			msg_time = utils::TimestampToQStr(items[i]["last_message"]["date"].toInt());
 
 			QJsonObject message = items[i]["last_message"].toObject();
-			
+
 			DialogWidget *dialogwidget = new DialogWidget(nullptr, title, last_msg, unread, msg_time );
 			dialogwidget->peer_id = conversation["peer"]["id"].toInt();
 			dialogwidget->type = items[i]["conversation"]["peer"]["type"].toString();		
-			//dialogwidget->messages.append(message);
-	
+
 			connect( dialogwidget, SIGNAL(dialogSelected(DialogWidget *)), SLOT(dialogSelected(DialogWidget *)) );
 			ui->dialogsLayout->addWidget(dialogwidget);
 
-/*			
-			if( dialogwidget->type == "user" )
-			{
-				profile_t profile = db->getProfile( dialogwidget->peer_id );
-				dialogwidget->setDialogName(profile.first_name+" "+profile.last_name);
-			}
-			else if( dialogwidget->peer_id < 0 )
-				dialogwidget->setDialogName(db->getGroup(qAbs(dialogwidget->peer_id)).name);
-*/
-			
 			if( dialogwidget->type == "user")
 			{
 				for( int j = 0; j < profiles.count(); j++)
 				{
 					const QJsonObject profile = profiles[j].toObject();
 					if( profile["id"].toInt() == dialogwidget->peer_id )
-					{						
+					{
 						if( !profile["photo_200"].isUndefined() )
 						{
 							QString img_url = profile["photo_200"].toString();
@@ -194,7 +185,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 				for( int j = 0; j < groups.size(); j++)
 				{
 					const QJsonObject group = groups[j].toObject();
-					
+
 					if( group["id"].toInt() == -dialogwidget->peer_id )
 					{
 						if( !group["photo_200"].isUndefined() )
@@ -210,7 +201,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 						dialogwidget->setDialogName(group["name"].toString());
 						break;
 					}
-				}				
+				}
 			}
 			else if( dialogwidget->type == "chat" )
 			{
@@ -226,7 +217,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 				}
 			}
 		}
-		
+
 		if( ui->dialogsArea->isScrolledDown() && m_iCurDialogCount < m_iDialogCount )
 			requestDialogs(10, m_iCurDialogCount);
 	}
@@ -246,33 +237,25 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 		if( widget )
 		{
 			const QJsonObject msg = msgs[i].toObject();
+
 			if(bottom)
 			{
 				ui->dialogsLayout->removeWidget(widget);
 				ui->dialogsLayout->insertWidget(0, widget);
 				widget->setLastMessageText(msg["text"].toString());			
-//				widget->messages.append(msg);
+				widget->messages.append(msg);
 			}
-//			else
-//				widget->messages.insert(0, msg);
+			else
+				widget->messages.insert(0, msg);
+
 			m_iCurMessagesCount++;
 
 			if( active_dialog && active_dialog == widget )
 			{
-				QString msg_time = UTIL_TimestampToQStr(msg["date"].toInt());
-				
+				QString msg_time = utils::TimestampToQStr(msg["date"].toInt());
+
 				int from_id = msg["from_id"].toInt();
 				QString name;
-
-/*
-				if( from_id < 0 )
-					name = db->getGroup(qAbs(id)).name;
-				else
-				{
-					profile_t profile = db->getProfile(id);
-					name = profile.first_name+" "+profile.last_name;
-				}
-*/
 
 				messagewidget *message = new messagewidget(this, "", msg["text"].toString() , msg_time );
 
@@ -286,11 +269,10 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 					for( int j = 0; j < profiles.count(); j++)
 					{
 						const QJsonObject profile = profiles[j].toObject();
-//						qDebug() << profile;
 						if( profile["id"].toInt() == from_id )
 						{
 							name = profile["first_name"].toString()+" "+profile["last_name"].toString();
-							
+
 							if( !profile["photo_200"].isUndefined() )
 							{
 								img_url = profile["photo_200"].toString();
@@ -310,11 +292,11 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 					for( int j = 0; j < groups.count(); j++)
 					{
 						const QJsonObject group = groups[j].toObject();
-						
+
 						if( group["id"].toInt() == -from_id )
 						{
 							name = group["name"].toString();
-							
+
 							if( !group["photo_200"].isUndefined() )
 							{
 								img_url = group["photo_200"].toString();
@@ -329,12 +311,11 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 						}
 					}
 				}
-				
 				message->setName(name);
 			}
 		}
 	}
-	
+
 	message_avatar_loader.download();
 }
 
@@ -343,82 +324,34 @@ DialogWidget *MessagesWindow::getDialogById(int peer_id)
 	for( int i = 0; i < ui->dialogsLayout->count(); i++ )
 	{
 		DialogWidget *widget = qobject_cast<DialogWidget *>(ui->dialogsLayout->itemAt(i)->widget());
-		
-		if( widget )
-		{
-			if( widget->peer_id == peer_id )
-				return widget;
-		}
+
+		if( widget && widget->peer_id == peer_id )
+			return widget;
 	}
 	return nullptr;
-}
-
-void clearLayout(QLayout* layout, bool deleteWidgets = true)
-{
-    while (QLayoutItem* item = layout->takeAt(0))
-    {
-        QWidget* widget;
-        if (  (deleteWidgets)
-              && (widget = item->widget())  ) {
-            delete widget;
-        }
-        if (QLayout* childLayout = item->layout()) {
-            clearLayout(childLayout, deleteWidgets);
-        }
-        delete item;
-    }
 }
 
 void MessagesWindow::dialogSelected(DialogWidget *dialog)
 {
 	if( !dialog ) return;
-	
+
 	active_dialog = dialog;
-	QList<QJsonObject>::iterator it; 
-	
-	clearLayout(ui->messagesLayout);
+
+	utils::ClearLayout(ui->messagesLayout); // TODO: should I store this layout in memory ?
 	ui->dialogIcon->setPixmap(QPixmap(".image_previews/"+dialog->photo));
 
-/*	
-	for( it = dialog->messages.begin(); it != dialog->messages.end(); it++)
-	{
-		QString name;
-		int id = (*it)["from_id"].toInt();
-		
-		if( id < 0 )
-			name = db->getGroup(qAbs(id)).name;
-		else
-		{
-			profile_t profile = db->getProfile(id);
-			name = profile.first_name+" "+profile.last_name;
-		}
-					
-		QString msg_time = UTIL_TimestampToQStr((*it)["date"].toInt());
-
-		QWidget *message = new messagewidget(this, name, (*it)["text"].toString(), msg_time );
-		ui->messagesLayout->addWidget(message);
-	}
-*/
-	
 	m_iCurMessagesCount = 0;
 	loadupMessages();
 }
 
-MessagesWindow::~MessagesWindow()
+void MessagesWindow::messageSended(QNetworkReply *reply)
 {
-	delete ui;
+	const QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+	qDebug() << obj;
 }
 
-void MessagesWindow::messageSended(QNetworkReply*)
+void MessagesWindow::sendMessage()
 {
-
-}
-
-void MessagesWindow::on_sendButton_released()
-{
-	if( !active_dialog )
-		return;
-	
 	QUrlQuery query
 	{
 		{"message", ui->messageEdit->toPlainText()},
@@ -426,27 +359,22 @@ void MessagesWindow::on_sendButton_released()
 		{"peer_id", QString::number(active_dialog->peer_id) }
 	};
 	ui->messageEdit->clear();
-    message_manager->get(vkapi.method("messages.send", query));
+	message_manager->get(vkapi.method("messages.send", query));
+}
+
+void MessagesWindow::on_sendButton_released()
+{
+	if( active_dialog )
+		sendMessage();
 }
 
 void MessagesWindow::TextEditEvent(QKeyEvent *event)
 {
-	if( event->type() == QKeyEvent::KeyPress )
-	{		
-		if( event->key() == Qt::Key_Return && !(QGuiApplication::queryKeyboardModifiers() & Qt::ShiftModifier))
-		{
-			if( !active_dialog )
-				return;
-			
-			QUrlQuery query
-			{
-				{"message", ui->messageEdit->toPlainText()},
-				{"random_id", "0"},
-				{"peer_id", QString::number(active_dialog->peer_id) }
-			};
-			ui->messageEdit->clear();
-			message_manager->get(vkapi.method("messages.send", query));
-		}
+	if( event->type() == QKeyEvent::KeyPress &&
+		(event->key() == Qt::Key_Return && !(QGuiApplication::queryKeyboardModifiers() & Qt::ShiftModifier)) &&
+		active_dialog ) // send message when enter key pressed 
+	{
+		sendMessage();
 	}
 }
 
@@ -460,7 +388,7 @@ void MessagesWindow::loadupMessages()
 {
 	if( !active_dialog )
 		return;
-	
+
 	QUrlQuery query
 	{
 		{"count", "30"},
@@ -469,6 +397,6 @@ void MessagesWindow::loadupMessages()
 		{"extended", "1"},
 		{"fields", "photo_200"}
 	};
-	
+
 	history_manager->get(vkapi.method("messages.getHistory", query));
 }

@@ -58,42 +58,38 @@ void DownloadManager::startNextDownload()
 		bDownloading = false;
 		return;
 	}
-		
+
 	QPair<QUrl, QString> item = downloadQueue.dequeue();
 
-	if( item.second == "PlLXnNg6tuY" )
-	{
-		qDebug() << item.first;
-	}
-	
 	output.setFileName(download_dir+"/"+item.second);
-    if (!output.open(QIODevice::WriteOnly)) {
-        startNextDownload();
-        return;
-    }
+	if (!output.open(QIODevice::WriteOnly))
+	{
+		startNextDownload();
+		return;
+	}
 
-    QNetworkRequest request(item.first);
-    currentDownload = manager.get(request);
+	QNetworkRequest request(item.first);
+	currentDownload = manager.get(request);
 
-    connect(currentDownload, SIGNAL(finished()),
-            SLOT(downloadFinished()));
-    connect(currentDownload, SIGNAL(readyRead()),
-            SLOT(downloadReadyRead()));
+	connect(currentDownload, SIGNAL(finished()),
+		SLOT(downloadFinished()));
+	connect(currentDownload, SIGNAL(readyRead()),
+		SLOT(downloadReadyRead()));
 }
 
 void DownloadManager::downloadFinished()
 {
 	output.close();	
-	
-    if (currentDownload->error())
+
+	if (currentDownload->error())
 		emit downloaded( output.fileName(), 1);
 	else
 		emit downloaded( output.fileName(), 0);
 
-    startNextDownload();
+	startNextDownload();
 }
 
 void DownloadManager::downloadReadyRead()
 {
-    output.write(currentDownload->readAll());
+	output.write(currentDownload->readAll());
 }

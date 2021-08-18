@@ -2,7 +2,12 @@
 #define UTILS_H
 
 #include <QtCore>
+#include <QLayout>
+#include <QWidget>
 
-QString UTIL_TimestampToQStr( int timestamp );
+namespace utils {
+	QString TimestampToQStr( int timestamp );
+	void ClearLayout(QLayout* layout, bool deleteWidgets = true);
+};
 
 #endif // UTILS_H

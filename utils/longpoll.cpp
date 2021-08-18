@@ -7,8 +7,7 @@ LongPoll::LongPoll(QObject *parent) : QObject(parent)
 	_manager = new QNetworkAccessManager();
 	msg_manager = new QNetworkAccessManager();
 	QObject::connect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(longpollReply(QNetworkReply*)));
-	QObject::connect(msg_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getMsgReply(QNetworkReply*)));
-	
+	QObject::connect(msg_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getMsgReply(QNetworkReply*)));	
 }
 
 void LongPoll::getLongPollServer()

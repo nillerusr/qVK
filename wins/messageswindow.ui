@@ -395,6 +395,9 @@
            </widget>
           </item>
           <item>
+           <layout class="QVBoxLayout" name="messagesQueuedLayout"/>
+          </item>
+          <item>
            <layout class="QVBoxLayout" name="messagesLayout">
             <property name="spacing">
              <number>0</number>
@@ -488,8 +491,8 @@
            <string/>
           </property>
           <property name="icon">
-           <iconset>
-            <normaloff>res/send.svg</normaloff>res/send.svg</iconset>
+           <iconset resource="../icons.qrc">
+            <normaloff>:/icons/res/send.svg</normaloff>:/icons/res/send.svg</iconset>
           </property>
           <property name="iconSize">
            <size>
