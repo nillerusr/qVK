@@ -13,6 +13,9 @@ messagewidget::messagewidget(QWidget *parent, QString nickname, QString msg, QSt
 	ui->nickname->setText(nickname);
 	ui->message->setText(msg);
 	ui->datetime->setText(time);
+
+	message_id = 0;
+	status = MESSAGE_STATUS_NONE;
 }
 
 messagewidget::~messagewidget()
@@ -29,4 +32,19 @@ void messagewidget::setPhoto(QPixmap pix)
 void messagewidget::setName(QString name)
 {
 	ui->nickname->setText(name);
+}
+
+void messagewidget::setDateTime( QString datetime )
+{
+	ui->datetime->setText( datetime );
+}
+
+void messagewidget::setText( QString text )
+{
+	ui->message->setText(text);
+}
+
+QString messagewidget::getText()
+{
+	return ui->message->toPlainText();
 }

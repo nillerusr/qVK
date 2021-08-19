@@ -38,7 +38,7 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	m_iCurMessagesCount = 0;
 	m_iDialogCount = 0;
 	active_dialog = nullptr;
-	requestDialogs(5);
+	requestDialogs(10);
 	ui->messagesArea->m_bScrollDownNeed = true;
 
 	conversation_avatar_loader.setDownloadDirectory(".image_previews");
@@ -196,7 +196,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 							if( pix.load(".image_previews/"+dialogwidget->photo) )
 								dialogwidget->setPhoto(pix);
 							else
-								conversation_avatar_loader.append(img_url, dialogwidget->photo);	
+								conversation_avatar_loader.append(img_url, dialogwidget->photo);
 						}
 						dialogwidget->setDialogName(group["name"].toString());
 						break;
@@ -213,7 +213,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 					if( pix.load(".image_previews/"+dialogwidget->photo) )
 						dialogwidget->setPhoto(pix);
 					else
-						conversation_avatar_loader.append(img_url, dialogwidget->photo);				
+						conversation_avatar_loader.append(img_url, dialogwidget->photo);
 				}
 			}
 		}
@@ -255,10 +255,12 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 				QString msg_time = utils::TimestampToQStr(msg["date"].toInt());
 
 				int from_id = msg["from_id"].toInt();
+				
 				QString name;
 
 				messagewidget *message = new messagewidget(this, "", msg["text"].toString() , msg_time );
-
+				message->message_id = msg["id"].toInt();
+				
 				if(bottom)
 					ui->messagesLayout->addWidget(message);
 				else
@@ -338,6 +340,7 @@ void MessagesWindow::dialogSelected(DialogWidget *dialog)
 	active_dialog = dialog;
 
 	utils::ClearLayout(ui->messagesLayout); // TODO: should I store this layout in memory ?
+	utils::ClearLayout(ui->messagesQueuedLayout);
 	ui->dialogIcon->setPixmap(QPixmap(".image_previews/"+dialog->photo));
 
 	m_iCurMessagesCount = 0;
@@ -346,8 +349,47 @@ void MessagesWindow::dialogSelected(DialogWidget *dialog)
 
 void MessagesWindow::messageSended(QNetworkReply *reply)
 {
-	const QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
-	qDebug() << obj;
+	const QJsonObject json_obj = QJsonDocument::fromJson(reply->readAll()).object();
+	if( json_obj["response"].isUndefined() )
+	{
+		for( int i = 0; i < ui->messagesQueuedLayout->count(); i++ )
+		{
+			messagewidget *message = qobject_cast<messagewidget *>(ui->messagesQueuedLayout->itemAt(i)->widget());
+			if( message->status == MESSAGE_SENDING || message->status == MESSAGE_QUEUED )
+			{
+				message->status = MESSAGE_SEND_FAILED;
+				message->setDateTime("Error"); // setDateTime? Why not? 
+			}
+		}
+	}
+	else
+	{
+		for( int i = 0; i < ui->messagesQueuedLayout->count(); i++ )
+		{
+			messagewidget *message = qobject_cast<messagewidget *>(ui->messagesQueuedLayout->itemAt(i)->widget());
+			if( message->status == MESSAGE_SENDING )
+			{
+				message->setDateTime(QDateTime().currentDateTime().toString("hh:mm"));
+				ui->messagesQueuedLayout->removeWidget(message);
+				ui->messagesLayout->addWidget(message);
+				message->message_id = json_obj["response"].toInt();
+				message->status = MESSAGE_SEND;
+				m_iCurMessagesCount++;				
+			}
+			else if( message->status == MESSAGE_QUEUED )
+			{
+				message->status = MESSAGE_SENDING;
+				QUrlQuery query
+				{
+					{"message", message->getText()},
+					{"random_id", "0"},
+					{"peer_id", QString::number(active_dialog->peer_id) }
+				};
+				message_manager->get(vkapi.method("messages.send", query));
+				break;
+			}
+		}
+	}
 }
 
 void MessagesWindow::sendMessage()
@@ -358,8 +400,34 @@ void MessagesWindow::sendMessage()
 		{"random_id", "0"},
 		{"peer_id", QString::number(active_dialog->peer_id) }
 	};
+
+	messagewidget *message = new messagewidget(this, "Me", ui->messageEdit->toPlainText() , "In queue" );
+	ui->messagesQueuedLayout->addWidget(message);
+	
+	bool bSending = false;
+	for( int i = 0; i < ui->messagesQueuedLayout->count(); i++ )
+	{
+		messagewidget *widget = qobject_cast<messagewidget *>(ui->messagesQueuedLayout->itemAt(i)->widget());
+		if( widget->status == MESSAGE_SENDING )
+		{
+			bSending = true;
+			break;
+		}
+	}
+	
+	if( bSending )
+	{
+		message->setDateTime("In queue");
+		message->status = MESSAGE_QUEUED;
+	}
+	else
+	{
+		message->setDateTime("Sending");
+		message->status = MESSAGE_SENDING;
+		message_manager->get(vkapi.method("messages.send", query));
+	}
+	
 	ui->messageEdit->clear();
-	message_manager->get(vkapi.method("messages.send", query));
 }
 
 void MessagesWindow::on_sendButton_released()
@@ -370,9 +438,8 @@ void MessagesWindow::on_sendButton_released()
 
 void MessagesWindow::TextEditEvent(QKeyEvent *event)
 {
-	if( event->type() == QKeyEvent::KeyPress &&
-		(event->key() == Qt::Key_Return && !(QGuiApplication::queryKeyboardModifiers() & Qt::ShiftModifier)) &&
-		active_dialog ) // send message when enter key pressed 
+	if( !ui->messageEdit->toPlainText().isEmpty() &&
+		active_dialog ) 
 	{
 		sendMessage();
 	}

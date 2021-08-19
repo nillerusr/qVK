@@ -96,7 +96,8 @@ void LongPoll::ParseLongPollEvents(const QJsonArray &updates)
 		switch(update.at(0).toInt())
 		{
 		case MESSAGE_NEW:
-			getMsg(update[1].toInt());
+			if( update[7].toObject()["from"].toString().toInt() != vkapi.page_id )
+				getMsg(update[1].toInt());
 			break;
 		case MESSAGE_EDIT:
 			break;

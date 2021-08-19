@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1057</width>
-    <height>500</height>
+    <width>1081</width>
+    <height>575</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -219,7 +219,7 @@
               <x>0</x>
               <y>0</y>
               <width>380</width>
-              <height>425</height>
+              <height>500</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -379,11 +379,14 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>576</width>
-           <height>391</height>
+           <width>600</width>
+           <height>466</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QWidget" name="spacer" native="true">
             <property name="sizePolicy">
@@ -395,10 +398,14 @@
            </widget>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="messagesQueuedLayout"/>
+           <layout class="QVBoxLayout" name="messagesLayout">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+           </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="messagesLayout">
+           <layout class="QVBoxLayout" name="messagesQueuedLayout">
             <property name="spacing">
              <number>0</number>
             </property>

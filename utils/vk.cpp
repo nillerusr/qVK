@@ -56,7 +56,7 @@ const QJsonObject vkApi::login(QString username, QString password, QString captc
 		{"username", username},
 		{"password", password},
 		{"2fa_supported", "1"}
-	};
+	}; 
 
 	if( !captcha.isEmpty() && !captcha_sid.isEmpty() )
 	{

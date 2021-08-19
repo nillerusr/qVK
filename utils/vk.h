@@ -21,6 +21,7 @@ public:
 	const QJsonObject login( QString username, QString password, QString captcha = "", QString code = "");
 	void setAuthParams( QString token, int userid);
 
+	int page_id;	
 private:
 	QNetworkAccessManager *networkmanager;
 	QNetworkRequest req;
@@ -29,7 +30,6 @@ private:
 	QString ver;
 	QString access_token;
 	QString captcha_sid;
-	int page_id;
 };
 
 extern vkApi vkapi;
