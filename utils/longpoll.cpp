@@ -72,8 +72,9 @@ void LongPoll::LongPollRequest()
 
 void LongPoll::getMsgReply(QNetworkReply *reply)
 {
-	const QJsonObject object = QJsonDocument::fromJson(reply->readAll()).object();	
-	emit Message_New(object);
+	const QJsonObject object = QJsonDocument::fromJson(reply->readAll()).object();
+	if( object["response"]["items"][0]["from_id"].toInt() != vkapi.page_id )
+		emit Message_New(object);
 }
 
 void LongPoll::getMsg(int message_id)

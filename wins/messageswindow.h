@@ -34,7 +34,7 @@ private:
 	QNetworkAccessManager *message_manager;
 	QNetworkAccessManager *history_manager;
 
-	DownloadManager conversation_avatar_loader, message_avatar_loader;
+	DownloadManager conversation_avatar_loader, message_avatar_loader, profile_avatar_loader;
 	
 	void requestDialogs(int count, int offset = 0);
 	DialogWidget *getDialogById(int peer_id);
@@ -42,7 +42,8 @@ private:
 	int m_iCurDialogCount, m_iDialogCount, m_iCurMessagesCount;
 	QTimer resizeTimer;
 	DialogWidget *active_dialog;
-
+	QString profile_avatar;
+	
 private slots:
 	void addDialogs(QNetworkReply *reply);
 	void loadupDialogs();
@@ -55,6 +56,7 @@ private slots:
 	void messageHistory(QNetworkReply *reply);
 	void conversation_avatar_downloaded(QString filename, int error);
 	void message_avatar_downloaded(QString filename, int error);
+	void profile_avatar_downloaded(QString filename, int error);
 	
 	void on_sendButton_released();
 	void TextEditEvent(QKeyEvent *event);

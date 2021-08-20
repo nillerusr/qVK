@@ -58,7 +58,8 @@ void LoginWindow::tryLogin()
 		{
 			if( error["error"] == "need_validation") // TODO: 2FA Auth
 			{
-				
+				Msgbox.setText("2FA not implemented now");
+				Msgbox.exec();
 			}
 
 			if( !error["captcha_img"].isUndefined() )

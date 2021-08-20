@@ -26,14 +26,15 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	connect( dialogs_manager, SIGNAL(finished(QNetworkReply*)), SLOT(addDialogs(QNetworkReply*)));
 	connect( ui->dialogsArea, SIGNAL(scrolledDown()), SLOT(loadupDialogs()));
 	connect( &resizeTimer, SIGNAL(timeout()), SLOT(resizeUpdate()) );
-	connect( &longpoll, SIGNAL(Message_New(const QJsonObject)), SLOT(updateMessages(const QJsonObject)) );
+	connect( &longpoll, SIGNAL(Message_New(const QJsonObject)), SLOT(updateMessages(const QJsonObject)));
 	connect( message_manager, SIGNAL(finished(QNetworkReply*)), SLOT(messageSended(QNetworkReply*)));
 	connect( ui->messageEdit, SIGNAL(sKeyPressEvent(QKeyEvent*)), SLOT(TextEditEvent(QKeyEvent*)));
 	connect( history_manager, SIGNAL(finished(QNetworkReply*)), SLOT(messageHistory(QNetworkReply*)));
 	connect( ui->messagesArea, SIGNAL(scrolledUp()), SLOT(loadupMessages()));
-	connect( &conversation_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(conversation_avatar_downloaded(QString, int)) );
-	connect( &message_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(message_avatar_downloaded(QString, int)) );
-
+	connect( &conversation_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(conversation_avatar_downloaded(QString, int)));
+	connect( &message_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(message_avatar_downloaded(QString, int)));
+	connect( &profile_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(profile_avatar_downloaded(QString, int)));
+	
 	m_iCurDialogCount = 0;
 	m_iCurMessagesCount = 0;
 	m_iDialogCount = 0;
@@ -43,11 +44,23 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 
 	conversation_avatar_loader.setDownloadDirectory(".image_previews");
 	message_avatar_loader.setDownloadDirectory(".image_previews");
+	profile_avatar_loader.setDownloadDirectory(".image_previews");
+	
+	profile_avatar = utils::getHashFromPhotoUrl(vkapi.photo_url);
+	profile_avatar_loader.append( vkapi.photo_url, profile_avatar );
+	profile_avatar_loader.download();
 }
 
 MessagesWindow::~MessagesWindow()
 {
 	delete ui;
+}
+
+void MessagesWindow::profile_avatar_downloaded( QString filename, int error )
+{
+	QPixmap pix;
+	if( !error && pix.load(filename) )
+			ui->profilePhoto->setPixmap(pix);
 }
 
 void MessagesWindow::conversation_avatar_downloaded(QString filename, int error)
@@ -125,7 +138,6 @@ void MessagesWindow::loadupDialogs()
 void MessagesWindow::addDialogs(QNetworkReply *reply)
 {
 	QString msg_time, img_url;
-	QPixmap pix;
 
 	const QJsonObject jObj = QJsonDocument::fromJson(reply->readAll()).object();
 
@@ -154,7 +166,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 			dialogwidget->peer_id = conversation["peer"]["id"].toInt();
 			dialogwidget->type = items[i]["conversation"]["peer"]["type"].toString();		
 
-			connect( dialogwidget, SIGNAL(dialogSelected(DialogWidget *)), SLOT(dialogSelected(DialogWidget *)) );
+			connect( dialogwidget, SIGNAL(dialogSelected(DialogWidget*)), SLOT(dialogSelected(DialogWidget*)) );
 			ui->dialogsLayout->addWidget(dialogwidget);
 
 			if( dialogwidget->type == "user")
@@ -167,13 +179,8 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 						if( !profile["photo_200"].isUndefined() )
 						{
 							QString img_url = profile["photo_200"].toString();
-							dialogwidget->photo = img_url.split("/").last().split(".jpg")[0];
-							dialogwidget->photo.truncate(20);
-
-							if( pix.load(".image_previews/"+dialogwidget->photo) )
-								dialogwidget->setPhoto(pix);
-							else
-								conversation_avatar_loader.append(img_url, dialogwidget->photo);	
+							dialogwidget->photo = utils::getHashFromPhotoUrl( img_url );
+							conversation_avatar_loader.append(img_url, dialogwidget->photo);	
 						}
 						dialogwidget->setDialogName(profile["first_name"].toString()+" "+profile["last_name"].toString());
 						break;
@@ -191,12 +198,8 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 						if( !group["photo_200"].isUndefined() )
 						{
 							img_url = group["photo_200"].toString();
-							dialogwidget->photo = img_url.split("/").last().split(".jpg")[0];
-							dialogwidget->photo.truncate(20);
-							if( pix.load(".image_previews/"+dialogwidget->photo) )
-								dialogwidget->setPhoto(pix);
-							else
-								conversation_avatar_loader.append(img_url, dialogwidget->photo);
+							dialogwidget->photo = utils::getHashFromPhotoUrl( img_url );
+							conversation_avatar_loader.append(img_url, dialogwidget->photo);
 						}
 						dialogwidget->setDialogName(group["name"].toString());
 						break;
@@ -208,12 +211,8 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 				if( !conversation["chat_settings"]["photo"]["photo_200"].isUndefined() )
 				{
 					img_url = conversation["chat_settings"]["photo"]["photo_200"].toString();
-					dialogwidget->photo = img_url.split("/").last().split(".jpg")[0];
-					dialogwidget->photo.truncate(20);
-					if( pix.load(".image_previews/"+dialogwidget->photo) )
-						dialogwidget->setPhoto(pix);
-					else
-						conversation_avatar_loader.append(img_url, dialogwidget->photo);
+					dialogwidget->photo = utils::getHashFromPhotoUrl( img_url );
+					conversation_avatar_loader.append(img_url, dialogwidget->photo);
 				}
 			}
 		}
@@ -226,7 +225,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 
 void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 {
-	QString img_url; QPixmap pix;
+	QString img_url;
 	const QJsonArray msgs = messages["response"]["items"].toArray();
 	const QJsonArray profiles = messages["response"]["profiles"].toArray();
 	const QJsonArray groups = messages["response"]["groups"].toArray();
@@ -278,12 +277,8 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 							if( !profile["photo_200"].isUndefined() )
 							{
 								img_url = profile["photo_200"].toString();
-								message->photo = img_url.split("/").last().split(".jpg")[0];
-								message->photo.truncate(20);
-								if( pix.load(".image_previews/"+message->photo) )
-									message->setPhoto(pix);
-								else if( !message_avatar_loader.queueExists(message->photo) )
-									message_avatar_loader.append(img_url, message->photo);
+								message->photo = utils::getHashFromPhotoUrl( img_url );
+								message_avatar_loader.append(img_url, message->photo);
 							}
 							break;	
 						}
@@ -302,12 +297,8 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 							if( !group["photo_200"].isUndefined() )
 							{
 								img_url = group["photo_200"].toString();
-								message->photo = img_url.split("/").last().split(".jpg")[0];
-								message->photo.truncate(20);
-								if( pix.load(".image_previews/"+message->photo) )
-									message->setPhoto(pix);
-								else if( !message_avatar_loader.queueExists(message->photo) )
-									message_avatar_loader.append(img_url, message->photo);	
+								message->photo = utils::getHashFromPhotoUrl( img_url );
+								message_avatar_loader.append(img_url, message->photo);	
 							}
 							break;
 						}
@@ -401,8 +392,9 @@ void MessagesWindow::sendMessage()
 		{"peer_id", QString::number(active_dialog->peer_id) }
 	};
 
-	messagewidget *message = new messagewidget(this, "Me", ui->messageEdit->toPlainText() , "In queue" );
+	messagewidget *message = new messagewidget(this, vkapi.getUserName(), ui->messageEdit->toPlainText() , "In queue" );
 	ui->messagesQueuedLayout->addWidget(message);
+	message->setPhoto(".image_previews/"+profile_avatar);
 	
 	bool bSending = false;
 	for( int i = 0; i < ui->messagesQueuedLayout->count(); i++ )
@@ -436,7 +428,7 @@ void MessagesWindow::on_sendButton_released()
 		sendMessage();
 }
 
-void MessagesWindow::TextEditEvent(QKeyEvent *event)
+void MessagesWindow::TextEditEvent(QKeyEvent *)
 {
 	if( !ui->messageEdit->toPlainText().isEmpty() &&
 		active_dialog ) 

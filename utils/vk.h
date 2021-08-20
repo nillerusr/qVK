@@ -7,29 +7,35 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QUrlQuery>
+#include "downloadmanager.h"
+
 
 // Documentation
 // https://vk.com/dev/methods
 
-class vkApi
+class vkApi : public QObject
 {
+    Q_OBJECT
 public:
-	vkApi();
+	vkApi(QObject *parent = 0);
 	QNetworkReply *request(QUrl url);
 	QNetworkRequest method(QString api_method, QUrlQuery query = QUrlQuery());
 
 	const QJsonObject login( QString username, QString password, QString captcha = "", QString code = "");
-	void setAuthParams( QString token, int userid);
+	void init( QString token, int userid);
+	QString getUserName();
 
-	int page_id;	
+	int page_id;
+	QString photo_url;
 private:
 	QNetworkAccessManager *networkmanager;
 	QNetworkRequest req;
-	QString client_secret;
-	QString client_id;
-	QString ver;
-	QString access_token;
-	QString captcha_sid;
+	QString client_secret, client_id, ver, access_token, captcha_sid;
+	QString first_name, last_name;
+
+
+private slots:
+	void pageinfoReply(QNetworkReply *reply);	
 };
 
 extern vkApi vkapi;

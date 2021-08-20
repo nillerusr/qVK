@@ -1,6 +1,7 @@
 #include "downloadmanager.h"
 #include <QCoreApplication>
 #include <QDir>
+#include <QFile>
 #include <QNetworkReply>
 
 // TODO: multithreading downloading
@@ -11,16 +12,35 @@ DownloadManager::DownloadManager(QObject *parent) : QObject(parent)
 	bDownloading = false;
 }
 
+bool DownloadManager::FileAlreadyExists(const QString filename)
+{
+	QFile file(filename);
+	if( file.exists() )
+	{
+		emit downloaded(filename, 0);
+		return true;
+	}
+	return false;
+}
+
 void DownloadManager::append(QList<QPair<QString, QString>> urls)
 {
 	QList<QPair<QString, QString>>::iterator s;
 
 	for( s = urls.begin(); s != urls.end(); ++s )
+	{
+		if( FileAlreadyExists( download_dir+"/"+(*s).second ) || queueExists((*s).second) )
+			continue;
+	
 		downloadQueue.enqueue({QUrl::fromEncoded((*s).first.toLocal8Bit()), (*s).second});
+	}
 }
 
 void DownloadManager::append(const QString url, const QString filename)
 {
+	if( FileAlreadyExists(download_dir+"/"+filename) || queueExists(filename) )
+		return;
+
 	downloadQueue.enqueue({QUrl::fromEncoded(url.toLocal8Bit()), filename});
 }
 

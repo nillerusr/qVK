@@ -29,6 +29,16 @@ void messagewidget::setPhoto(QPixmap pix)
 	ui->photo->setScaledContents( true );
 }
 
+void messagewidget::setPhoto(QString filename)
+{
+	QPixmap pix;
+	if( pix.load(filename) )
+	{
+		ui->photo->setPixmap( pix );
+		ui->photo->setScaledContents( true );
+	}
+}
+
 void messagewidget::setName(QString name)
 {
 	ui->nickname->setText(name);

@@ -27,6 +27,7 @@ public:
 	void setName( QString name );
 	void setText( QString text );
 	void setDateTime( QString datetime );
+	void setPhoto(QString filename);
 	QString getText();
 	
 	int message_id;

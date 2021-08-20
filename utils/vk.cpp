@@ -1,13 +1,14 @@
 #include "vk.h"
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QString>
 #include <QEventLoop>
 #include <QFile>
 #include <QDir>
 
 vkApi vkapi;
 
-vkApi::vkApi()
+vkApi::vkApi(QObject *parent) : QObject(parent)
 {
 	client_secret = "lxhD8OD7dMsqtXIm5IUY";
 	client_id = "2685278";
@@ -16,12 +17,37 @@ vkApi::vkApi()
 	page_id = 0;
 	captcha_sid = "";
 	networkmanager = new QNetworkAccessManager();
+	first_name = "Me"; last_name = "";
+	photo_url = "";
 }
 
-void vkApi::setAuthParams(QString token, int userid)
+void vkApi::pageinfoReply(QNetworkReply *reply)
+{
+	const QJsonObject json_obj = QJsonDocument::fromJson(reply->readAll()).object();
+	const QJsonObject profile = json_obj["response"][0].toObject();
+	first_name = profile["first_name"].toString();
+	last_name = profile["last_name"].toString();
+	photo_url = profile["photo_200"].toString();
+}
+
+void vkApi::init(QString token, int userid)
 {
 	this->access_token = token;
 	this->page_id = userid;
+	
+	QUrlQuery query
+	{
+		{"user_ids", QString::number(userid)},
+		{"fields", "photo_200"}
+	};
+
+	QNetworkReply *reply = networkmanager->get(this->method("users.get", query));
+
+	QEventLoop event;
+	QObject::connect(reply, SIGNAL(finished()), &event, SLOT(quit()));	
+	event.exec();
+
+	pageinfoReply(reply);	
 }
 
 QNetworkReply *vkApi::request(QUrl url)
@@ -74,8 +100,7 @@ const QJsonObject vkApi::login(QString username, QString password, QString captc
 	
 	if (jObj.contains("access_token"))
 	{
-		access_token = jObj.value("access_token").toString();
-		page_id = jObj.value("user_id").toInt();
+		init( jObj.value("access_token").toString(), jObj.value("user_id").toInt() );
 
 		QFile file(QDir::currentPath()+"/config.json");
 		file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
@@ -91,3 +116,7 @@ const QJsonObject vkApi::login(QString username, QString password, QString captc
 	return jObj;
 }
 
+QString vkApi::getUserName()
+{
+	return first_name+" "+last_name;
+}

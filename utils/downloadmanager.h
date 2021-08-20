@@ -20,6 +20,7 @@ public:
 	void setDownloadDirectory( QString downdir );
 	void download();
 	bool queueExists(const QString filename);
+	bool FileAlreadyExists( const QString filename );
 	
 private slots:
     void startNextDownload();

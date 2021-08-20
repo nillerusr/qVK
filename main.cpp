@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	
 	if (jObj.contains("access_token"))
 	{
-		vkapi.setAuthParams(jObj.value("access_token").toString(),  jObj.value("user_id").toInt());
+		vkapi.init(jObj.value("access_token").toString(),  jObj.value("user_id").toInt());
 		messagewin = new MessagesWindow();
 		messagewin->show();
 	}

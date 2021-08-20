@@ -28,3 +28,11 @@ void utils::ClearLayout(QLayout* layout, bool deleteWidgets)
         delete item;
     }
 }
+
+QString utils::getHashFromPhotoUrl( QString url )
+{
+	QString hash;
+	hash = url.split("/").last().split(".jpg")[0];
+	hash.truncate(20);
+	return QString(hash);
+}
