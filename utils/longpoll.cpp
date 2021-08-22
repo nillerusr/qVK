@@ -63,6 +63,7 @@ void LongPoll::LongPollRequest()
 		{"key", lp_key},
 		{"ts", QString::number(lp_ts)},
 		{"wait", "25"},
+		{"lp_version", "3"},
 		{"mode", "10"}
 	};
 	
@@ -73,8 +74,7 @@ void LongPoll::LongPollRequest()
 void LongPoll::getMsgReply(QNetworkReply *reply)
 {
 	const QJsonObject object = QJsonDocument::fromJson(reply->readAll()).object();
-	if( object["response"]["items"][0]["from_id"].toInt() != vkapi.page_id )
-		emit Message_New(object);
+	emit Message_New(object);
 }
 
 void LongPoll::getMsg(int message_id)
@@ -97,10 +97,16 @@ void LongPoll::ParseLongPollEvents(const QJsonArray &updates)
 		switch(update.at(0).toInt())
 		{
 		case MESSAGE_NEW:
-			if( update[7].toObject()["from"].toString().toInt() != vkapi.page_id )
-				getMsg(update[1].toInt());
+			getMsg(update[1].toInt());
 			break;
+		case MESSAGE_SET_FLAG: {
+			int flags = update[2].toInt();
+			if( (flags & MESSAGE_DELETE_FOR_ALL) || (flags & MESSAGE_DELETED) )
+				emit Message_Delete( update[3].toInt(), update[1].toInt() );
+			break;
+		}
 		case MESSAGE_EDIT:
+			getMsg(update[1].toInt());			
 			break;
 		case OUTPUT_MESSAGE_READ:
 			break;

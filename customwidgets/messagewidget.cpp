@@ -58,3 +58,8 @@ QString messagewidget::getText()
 {
 	return ui->message->toPlainText();
 }
+
+void messagewidget::setStatusText( QString status )
+{
+	ui->status->setText( status );
+}

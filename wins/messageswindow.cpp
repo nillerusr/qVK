@@ -34,7 +34,8 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	connect( &conversation_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(conversation_avatar_downloaded(QString, int)));
 	connect( &message_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(message_avatar_downloaded(QString, int)));
 	connect( &profile_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(profile_avatar_downloaded(QString, int)));
-	
+	connect( &longpoll, SIGNAL(Message_Delete(int,int)), SLOT(messageDeleted(int,int)));
+
 	m_iCurDialogCount = 0;
 	m_iCurMessagesCount = 0;
 	m_iDialogCount = 0;
@@ -45,7 +46,7 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	conversation_avatar_loader.setDownloadDirectory(".image_previews");
 	message_avatar_loader.setDownloadDirectory(".image_previews");
 	profile_avatar_loader.setDownloadDirectory(".image_previews");
-	
+
 	profile_avatar = utils::getHashFromPhotoUrl(vkapi.photo_url);
 	profile_avatar_loader.append( vkapi.photo_url, profile_avatar );
 	profile_avatar_loader.download();
@@ -164,7 +165,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 
 			DialogWidget *dialogwidget = new DialogWidget(nullptr, title, last_msg, unread, msg_time );
 			dialogwidget->peer_id = conversation["peer"]["id"].toInt();
-			dialogwidget->type = items[i]["conversation"]["peer"]["type"].toString();		
+			dialogwidget->type = items[i]["conversation"]["peer"]["type"].toString();
 
 			connect( dialogwidget, SIGNAL(dialogSelected(DialogWidget*)), SLOT(dialogSelected(DialogWidget*)) );
 			ui->dialogsLayout->addWidget(dialogwidget);
@@ -241,7 +242,7 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 			{
 				ui->dialogsLayout->removeWidget(widget);
 				ui->dialogsLayout->insertWidget(0, widget);
-				widget->setLastMessageText(msg["text"].toString());			
+				widget->setLastMessageText(msg["text"].toString());
 				widget->messages.append(msg);
 			}
 			else
@@ -254,16 +255,37 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 				QString msg_time = utils::TimestampToQStr(msg["date"].toInt());
 
 				int from_id = msg["from_id"].toInt();
-				
+
 				QString name;
 
-				messagewidget *message = new messagewidget(this, "", msg["text"].toString() , msg_time );
-				message->message_id = msg["id"].toInt();
-				
+				messagewidget *message = nullptr;
+
+				for( int i = 0; i < ui->messagesLayout->count(); i++ )
+				{
+					message = qobject_cast<messagewidget *>(ui->messagesLayout->itemAt(i)->widget());
+					if( message->message_id == msg["id"].toInt() )
+						break;
+					message = nullptr;
+				}
+
+				if( !message )
+				{
+					message = new messagewidget(this, "", msg["text"].toString() , msg_time );
+					message->message_id = msg["id"].toInt();
+				}
+
+				if( !msg["update_time"].isUndefined() )
+				{
+					message->setStatusText("edited,");
+					message->setText(msg["text"].toString());
+					msg_time = utils::TimestampToQStr(msg["update_time"].toInt());
+					message->setDateTime(msg_time);
+				}
+
 				if(bottom)
 					ui->messagesLayout->addWidget(message);
 				else
-					ui->messagesLayout->insertWidget(0, message);				
+					ui->messagesLayout->insertWidget(0, message);
 
 				if( from_id > 0 )
 				{
@@ -280,7 +302,7 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 								message->photo = utils::getHashFromPhotoUrl( img_url );
 								message_avatar_loader.append(img_url, message->photo);
 							}
-							break;	
+							break;
 						}
 					}
 				}
@@ -365,7 +387,7 @@ void MessagesWindow::messageSended(QNetworkReply *reply)
 				ui->messagesLayout->addWidget(message);
 				message->message_id = json_obj["response"].toInt();
 				message->status = MESSAGE_SEND;
-				m_iCurMessagesCount++;				
+				m_iCurMessagesCount++;
 			}
 			else if( message->status == MESSAGE_QUEUED )
 			{
@@ -395,7 +417,7 @@ void MessagesWindow::sendMessage()
 	messagewidget *message = new messagewidget(this, vkapi.getUserName(), ui->messageEdit->toPlainText() , "In queue" );
 	ui->messagesQueuedLayout->addWidget(message);
 	message->setPhoto(".image_previews/"+profile_avatar);
-	
+
 	bool bSending = false;
 	for( int i = 0; i < ui->messagesQueuedLayout->count(); i++ )
 	{
@@ -406,7 +428,7 @@ void MessagesWindow::sendMessage()
 			break;
 		}
 	}
-	
+
 	if( bSending )
 	{
 		message->setDateTime("In queue");
@@ -418,7 +440,7 @@ void MessagesWindow::sendMessage()
 		message->status = MESSAGE_SENDING;
 		message_manager->get(vkapi.method("messages.send", query));
 	}
-	
+
 	ui->messageEdit->clear();
 }
 
@@ -431,7 +453,7 @@ void MessagesWindow::on_sendButton_released()
 void MessagesWindow::TextEditEvent(QKeyEvent *)
 {
 	if( !ui->messageEdit->toPlainText().isEmpty() &&
-		active_dialog ) 
+		active_dialog )
 	{
 		sendMessage();
 	}
@@ -458,4 +480,20 @@ void MessagesWindow::loadupMessages()
 	};
 
 	history_manager->get(vkapi.method("messages.getHistory", query));
+}
+
+void MessagesWindow::messageDeleted(int peer_id, int message_id)
+{
+	if( active_dialog && active_dialog->peer_id == peer_id )
+	{
+		for( int i = 0; i < ui->messagesLayout->count(); i++ )
+		{
+			messagewidget *widget = qobject_cast<messagewidget *>(ui->messagesLayout->itemAt(i)->widget());
+			if( widget->message_id == message_id )
+			{
+				delete widget;
+				break;
+			}
+		}
+	}
 }

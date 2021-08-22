@@ -54,6 +54,7 @@ private slots:
 	void updateMessages(const QJsonObject messages, bool bottom = true);
 	void messageSended(QNetworkReply *reply);
 	void messageHistory(QNetworkReply *reply);
+	void messageDeleted(int peer_id, int message_id);
 	void conversation_avatar_downloaded(QString filename, int error);
 	void message_avatar_downloaded(QString filename, int error);
 	void profile_avatar_downloaded(QString filename, int error);
