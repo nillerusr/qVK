@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>white.css</file>
+    </qresource>
+</RCC>

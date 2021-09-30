@@ -10,6 +10,7 @@ WScrollArea::WScrollArea( QWidget *parent ) : QScrollArea(parent)
 	m_bScrollDownNeed = false;
 	m_bScrolledDown = true;
 	m_bScrolledUp = false;
+
 	iMaxRange = this->verticalScrollBar()->maximum();
 }
 

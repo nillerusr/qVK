@@ -42,7 +42,7 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	active_dialog = nullptr;
 	requestDialogs(10);
 	ui->messagesArea->m_bScrollDownNeed = true;
-
+	
 	conversation_avatar_loader.setDownloadDirectory(".image_previews");
 	message_avatar_loader.setDownloadDirectory(".image_previews");
 	profile_avatar_loader.setDownloadDirectory(".image_previews");
@@ -127,6 +127,7 @@ void MessagesWindow::requestDialogs(int count, int offset)
 		{"count", QString::number(count)},
 		{"offset", QString::number(offset)}
 	};
+	m_iCurDialogCount += count;
 	dialogs_manager->get(vkapi.method("messages.getConversations", query));	
 }
 
@@ -142,6 +143,9 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 
 	const QJsonObject jObj = QJsonDocument::fromJson(reply->readAll()).object();
 
+	qDebug() << jObj;
+	
+	
 	if ( !jObj["response"].isUndefined() )
 	{
 		m_iDialogCount = jObj["response"]["count"].toInt();
@@ -149,7 +153,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 		const QJsonArray profiles = jObj["response"]["profiles"].toArray();
 		const QJsonArray groups = jObj["response"]["groups"].toArray();
 
-		m_iCurDialogCount += items.count();
+		//m_iCurDialogCount += items.count();
 		for(int i = 0; i < items.count(); i++)
 		{
 			const QJsonObject conversation = items[i]["conversation"].toObject();
@@ -407,6 +411,9 @@ void MessagesWindow::messageSended(QNetworkReply *reply)
 
 void MessagesWindow::sendMessage()
 {
+	if( ui->messageEdit->toPlainText().isEmpty() )
+		return;
+		
 	QUrlQuery query
 	{
 		{"message", ui->messageEdit->toPlainText()},

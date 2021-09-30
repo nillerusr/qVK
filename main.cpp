@@ -24,6 +24,9 @@ int main(int argc, char *argv[])
 	QJsonObject jObj = jDoc.object();
 
 	//a.setStyle(new DiagnosticStyle());
+	QFile style(":/white.css");
+	style.open(QFile::ReadOnly);
+	a.setStyleSheet(style.readAll());
 	
 	if (jObj.contains("access_token"))
 	{
