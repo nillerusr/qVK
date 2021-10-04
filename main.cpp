@@ -8,12 +8,17 @@
 #include <QStylePainter>
 #include "wins/messageswindow.h"
 #include "wins/loginwindow.h"
+#include "wins/settingswindow.h"
 #include "utils/diagnosticstyle.h"
 
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
+	QCoreApplication::setOrganizationName("nillerusr");
+    //QCoreApplication::setOrganizationDomain("");
+    QCoreApplication::setApplicationName("qVK");
+	
 	LoginWindow loginwin;
 	MessagesWindow *messagewin;
 
@@ -24,7 +29,7 @@ int main(int argc, char *argv[])
 	QJsonObject jObj = jDoc.object();
 
 	//a.setStyle(new DiagnosticStyle());
-	QFile style(":/white.css");
+	QFile style(":/styles/white.css");
 	style.open(QFile::ReadOnly);
 	a.setStyleSheet(style.readAll());
 	

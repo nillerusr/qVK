@@ -62,6 +62,7 @@ private slots:
 	void on_sendButton_released();
 	void TextEditEvent(QKeyEvent *event);
 	void sendMessage();
+	void on_settingsButton_released();
 };
 
 #endif // MESSAGESWINDOW_H

@@ -37,13 +37,15 @@ SOURCES += \
     utils/utils.cpp \
     utils/vk.cpp \
     main.cpp \
-    unused/database.cpp
+    unused/database.cpp \
+    wins/settingswindow.cpp
 
 
 HEADERS += \
     customwidgets/dialogwidget.h \
     customwidgets/messagewidget.h \
     customwidgets/wscrollarea.h \
+    customwidgets/wtabwidget.h \
     customwidgets/wtextbrowser.h \
     customwidgets/wtextedit.h \
     wins/loginwindow.h \
@@ -53,14 +55,16 @@ HEADERS += \
     utils/longpoll.h \
     utils/utils.h \
     utils/vk.h \
-    unused/database.h
+    unused/database.h \
+    wins/settingswindow.h
 
 
 FORMS += \
     wins/loginwindow.ui \
     wins/messageswindow.ui \
     customwidgets/dialogwidget.ui \
-    customwidgets/messagewidget.ui
+    customwidgets/messagewidget.ui \
+    wins/settingswindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -10,6 +10,7 @@
 #include "customwidgets/messagewidget.h"
 #include "customwidgets/dialogwidget.h"
 #include "customwidgets/wscrollarea.h"
+#include "wins/settingswindow.h"
 
 MessagesWindow::MessagesWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -280,7 +281,7 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 
 				if( !msg["update_time"].isUndefined() )
 				{
-					message->setStatusText("edited,");
+					message->setStatusText("edited");
 					message->setText(msg["text"].toString());
 					msg_time = utils::TimestampToQStr(msg["update_time"].toInt());
 					message->setDateTime(msg_time);
@@ -504,3 +505,11 @@ void MessagesWindow::messageDeleted(int peer_id, int message_id)
 		}
 	}
 }
+
+void MessagesWindow::on_settingsButton_released()
+{
+	settingswindow *settings_win = new settingswindow(this);
+    this->hide();
+	settings_win->show();
+}
+
