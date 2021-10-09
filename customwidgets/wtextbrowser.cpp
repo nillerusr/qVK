@@ -28,6 +28,5 @@ void WTextBrowser::paintEvent(QPaintEvent *event)
 {
 	QTextBrowser::paintEvent(event);
 	if( !minHeight ) minHeight = minimumHeight();
-	qDebug() << document()->toPlainText().size();
 	setFixedHeight(document()->size().height() > minHeight ? document()->size().height() : minHeight);
 }

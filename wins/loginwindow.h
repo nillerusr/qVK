@@ -24,7 +24,7 @@ public:
 	DownloadManager captcha_img_loader;
 private slots:
 
-	void captcha_img_downloaded(QString filename, int error);
+	void captcha_img_downloaded(QString filename, QWidget *widget, int error);
 	void on_loginButton_released();
 	void on_cancelButton_released();
 	

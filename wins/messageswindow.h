@@ -34,7 +34,7 @@ private:
 	QNetworkAccessManager *message_manager;
 	QNetworkAccessManager *history_manager;
 
-	DownloadManager conversation_avatar_loader, message_avatar_loader, profile_avatar_loader;
+	DownloadManager conversation_avatar_loader, message_avatar_loader, profile_avatar_loader, message_attachment_loader;
 	
 	void requestDialogs(int count, int offset = 0);
 	DialogWidget *getDialogById(int peer_id);
@@ -55,9 +55,11 @@ private slots:
 	void messageSended(QNetworkReply *reply);
 	void messageHistory(QNetworkReply *reply);
 	void messageDeleted(int peer_id, int message_id);
-	void conversation_avatar_downloaded(QString filename, int error);
-	void message_avatar_downloaded(QString filename, int error);
-	void profile_avatar_downloaded(QString filename, int error);
+	
+	void conversation_avatar_downloaded(QString filename, QWidget *widget, int error);
+	void message_avatar_downloaded(QString filename, QWidget *widget, int error);
+	void profile_avatar_downloaded(QString filename, QWidget *widget, int error);
+	void message_attachment_downloaded(QString filename, QWidget *widget, int error);	
 	
 	void on_sendButton_released();
 	void TextEditEvent(QKeyEvent *event);

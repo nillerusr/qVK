@@ -1,4 +1,4 @@
-	#include "downloadmanager.h"
+#include "downloadmanager.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -12,47 +12,39 @@ DownloadManager::DownloadManager(QObject *parent) : QObject(parent)
 	bDownloading = false;
 }
 
-bool DownloadManager::FileAlreadyExists(const QString filename)
+bool DownloadManager::FileAlreadyExists(const QString filename, QWidget *widget )
 {
 	QFile file(filename);
 	if( file.exists() )
 	{
-		emit downloaded(filename, 0);
+		emit downloaded(filename, {widget}, 0);
 		return true;
 	}
 	return false;
 }
 
-void DownloadManager::append(QList<QPair<QString, QString>> urls)
-{
-	QList<QPair<QString, QString>>::iterator s;
 
-	for( s = urls.begin(); s != urls.end(); ++s )
-	{
-		if( FileAlreadyExists( download_dir+"/"+(*s).second ) || queueExists((*s).second) )
-			continue;
-	
-		downloadQueue.enqueue({QUrl::fromEncoded((*s).first.toLocal8Bit()), (*s).second});
-	}
-}
-
-void DownloadManager::append(const QString url, const QString filename)
+void DownloadManager::append(const QString url, const QString filename, QWidget *widget)
 {
-	if( FileAlreadyExists(download_dir+"/"+filename) || queueExists(filename) )
+	if( FileAlreadyExists(download_dir+"/"+filename, widget) || queueExists(filename, widget) )
 		return;
 
-	downloadQueue.enqueue({QUrl::fromEncoded(url.toLocal8Bit()), filename});
+	downloadQueue.enqueue({QUrl::fromEncoded(url.toLocal8Bit()), filename, {widget}});
 }
 
-bool DownloadManager::queueExists(const QString filename)
+bool DownloadManager::queueExists(const QString filename, QWidget *widget)
 {
 	for( int i = 0; i < downloadQueue.length(); i++ )
 	{
-		if( downloadQueue[i].second == filename )
+		if( downloadQueue[i].filename == filename )
+		{
+			downloadQueue[i].widgets.append( widget );
 			return true;
+		}
 	}
 	return false;
 }
+
 
 void DownloadManager::setDownloadDirectory( QString downdir )
 {
@@ -71,6 +63,7 @@ void DownloadManager::download()
 	}
 }
 
+
 void DownloadManager::startNextDownload()
 {
 	if (downloadQueue.isEmpty())
@@ -79,16 +72,16 @@ void DownloadManager::startNextDownload()
 		return;
 	}
 
-	QPair<QUrl, QString> item = downloadQueue.dequeue();
+	current_item = downloadQueue.dequeue();
 
-	output.setFileName(download_dir+"/"+item.second);
+	output.setFileName(download_dir+"/"+current_item.filename);
 	if (!output.open(QIODevice::WriteOnly))
 	{
 		startNextDownload();
 		return;
 	}
 
-	QNetworkRequest request(item.first);
+	QNetworkRequest request(current_item.url);
 	currentDownload = manager.get(request);
 
 	connect(currentDownload, SIGNAL(finished()),
@@ -101,10 +94,8 @@ void DownloadManager::downloadFinished()
 {
 	output.close();	
 
-	if (currentDownload->error())
-		emit downloaded( output.fileName(), 1);
-	else
-		emit downloaded( output.fileName(), 0);
+	for( QWidget *widget : current_item.widgets )
+		emit downloaded( output.fileName(), widget, 0);
 
 	startNextDownload();
 }

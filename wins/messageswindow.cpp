@@ -32,9 +32,12 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	connect( ui->messageEdit, SIGNAL(sKeyPressEvent(QKeyEvent*)), SLOT(TextEditEvent(QKeyEvent*)));
 	connect( history_manager, SIGNAL(finished(QNetworkReply*)), SLOT(messageHistory(QNetworkReply*)));
 	connect( ui->messagesArea, SIGNAL(scrolledUp()), SLOT(loadupMessages()));
-	connect( &conversation_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(conversation_avatar_downloaded(QString, int)));
-	connect( &message_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(message_avatar_downloaded(QString, int)));
-	connect( &profile_avatar_loader, SIGNAL(downloaded(QString, int)), SLOT(profile_avatar_downloaded(QString, int)));
+	connect( &conversation_avatar_loader, SIGNAL(downloaded(QString, QWidget*, int)), SLOT(conversation_avatar_downloaded(QString, QWidget*, int)));
+	connect( &message_avatar_loader, SIGNAL(downloaded(QString, QWidget*, int)), SLOT(message_avatar_downloaded(QString, QWidget*, int)));
+	connect( &profile_avatar_loader, SIGNAL(downloaded(QString, QWidget*, int)), SLOT(profile_avatar_downloaded(QString, QWidget*, int)));
+	connect( &message_attachment_loader, SIGNAL(downloaded(QString, QWidget*, int)), SLOT(message_attachment_downloaded(QString, QWidget*, int)));
+
+	
 	connect( &longpoll, SIGNAL(Message_Delete(int,int)), SLOT(messageDeleted(int,int)));
 
 	m_iCurDialogCount = 0;
@@ -47,9 +50,10 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	conversation_avatar_loader.setDownloadDirectory(".image_previews");
 	message_avatar_loader.setDownloadDirectory(".image_previews");
 	profile_avatar_loader.setDownloadDirectory(".image_previews");
+	message_attachment_loader.setDownloadDirectory(".image_previews");
 
 	profile_avatar = utils::getHashFromPhotoUrl(vkapi.photo_url);
-	profile_avatar_loader.append( vkapi.photo_url, profile_avatar );
+	profile_avatar_loader.append( vkapi.photo_url, profile_avatar, ui->profilePhoto );
 	profile_avatar_loader.download();
 }
 
@@ -58,54 +62,47 @@ MessagesWindow::~MessagesWindow()
 	delete ui;
 }
 
-void MessagesWindow::profile_avatar_downloaded( QString filename, int error )
+void MessagesWindow::profile_avatar_downloaded( QString filename, QWidget *widget, int error )
 {
-	QPixmap pix;
-	if( !error && pix.load(filename) )
-			ui->profilePhoto->setPixmap(pix);
+	if( !widget )
+		return;
+	
+	QPixmap pix(filename);
+	qobject_cast<QLabel*>(widget)->setPixmap(pix);
 }
 
-void MessagesWindow::conversation_avatar_downloaded(QString filename, int error)
+void MessagesWindow::message_attachment_downloaded(QString filename, QWidget *widget, int error)
 {
-	DialogWidget *d = nullptr;
-
-	if( !error )
-	{
-		QStringList l = filename.split("/");
-		for( int i = 0; i < ui->dialogsLayout->count(); i++ )
-		{
-			d = qobject_cast<DialogWidget *>(ui->dialogsLayout->itemAt(i)->widget());
-
-			if( d && d->photo == l.last() )
-					break;
-		}
-
-		QPixmap pix = QPixmap(filename);
-		if( d ) d->setPhoto(pix);
-		if( active_dialog == d )
-			ui->dialogIcon->setPixmap(pix);
-	}
+	if( !widget )
+		return;
+	
+	messagewidget *message = qobject_cast<messagewidget*>(widget);
+	message->addImageAttachment(filename);
 }
 
-void MessagesWindow::message_avatar_downloaded(QString filename, int error)
+void MessagesWindow::conversation_avatar_downloaded(QString filename, QWidget *widget, int error)
 {
-	QPixmap pix;
-	if( !error && active_dialog )
-	{
-		if( !pix.load(filename) )
-			return;
+	if( !widget )
+		return;
+	
+	DialogWidget *d = qobject_cast<DialogWidget*>(widget);
 
-		QStringList l = filename.split("/");
-		for( int i = 0; i < ui->messagesLayout->count(); i++)
-		{
-			messagewidget *m = qobject_cast<messagewidget*>(ui->messagesLayout->itemAt(i)->widget());
+	QPixmap pix = QPixmap(filename);
+	d->setPhoto(pix);
 
-			if( m && m->photo == l.last() )
-				m->setPhoto(pix);
-		}
-	}
+	if( active_dialog == d )
+		ui->dialogIcon->setPixmap(pix);
 }
 
+void MessagesWindow::message_avatar_downloaded(QString filename, QWidget *widget, int error)
+{
+	if( !widget )
+		return;
+
+	QPixmap pix(filename);
+	messagewidget *m = qobject_cast<messagewidget*>(widget);
+	m->setPhoto(pix);
+}
 
 void MessagesWindow::resizeEvent(QResizeEvent *event)
 {
@@ -142,10 +139,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 {
 	QString msg_time, img_url;
 
-	const QJsonObject jObj = QJsonDocument::fromJson(reply->readAll()).object();
-
-	qDebug() << jObj;
-	
+	const QJsonObject jObj = QJsonDocument::fromJson(reply->readAll()).object();	
 	
 	if ( !jObj["response"].isUndefined() )
 	{
@@ -186,7 +180,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 						{
 							QString img_url = profile["photo_200"].toString();
 							dialogwidget->photo = utils::getHashFromPhotoUrl( img_url );
-							conversation_avatar_loader.append(img_url, dialogwidget->photo);	
+							conversation_avatar_loader.append(img_url, dialogwidget->photo, dialogwidget);	
 						}
 						dialogwidget->setDialogName(profile["first_name"].toString()+" "+profile["last_name"].toString());
 						break;
@@ -205,7 +199,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 						{
 							img_url = group["photo_200"].toString();
 							dialogwidget->photo = utils::getHashFromPhotoUrl( img_url );
-							conversation_avatar_loader.append(img_url, dialogwidget->photo);
+							conversation_avatar_loader.append(img_url, dialogwidget->photo, dialogwidget);
 						}
 						dialogwidget->setDialogName(group["name"].toString());
 						break;
@@ -218,7 +212,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 				{
 					img_url = conversation["chat_settings"]["photo"]["photo_200"].toString();
 					dialogwidget->photo = utils::getHashFromPhotoUrl( img_url );
-					conversation_avatar_loader.append(img_url, dialogwidget->photo);
+					conversation_avatar_loader.append(img_url, dialogwidget->photo, dialogwidget);
 				}
 			}
 		}
@@ -236,6 +230,8 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 	const QJsonArray profiles = messages["response"]["profiles"].toArray();
 	const QJsonArray groups = messages["response"]["groups"].toArray();
 
+	qDebug() << messages;	
+	
 	for(int i = 0; i < msgs.count();i++)
 	{
 		DialogWidget *widget = getDialogById(messages["response"]["items"][i]["peer_id"].toInt());
@@ -279,6 +275,27 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 					message->message_id = msg["id"].toInt();
 				}
 
+				const QJsonArray attachments = msg["attachments"].toArray();
+				for( int i = 0; i < attachments.size(); i++ )
+				{
+					if( !attachments[i]["photo"].isUndefined() )
+					{						
+						QString filename = QString::number(attachments[i]["photo"]["owner_id"].toInt())+
+								"_"+QString::number(attachments[i]["photo"]["id"].toInt());
+						
+						const QJsonArray sizes = attachments[i]["photo"]["sizes"].toArray();
+						for( int j = 0; j < sizes.size(); j++ )
+						{
+							if( sizes[j]["type"].toString() == "x" )
+							{
+								QString url = sizes[j]["url"].toString();
+								message_attachment_loader.append(url, filename, message);
+							}
+						}
+						
+					}
+				}
+				
 				if( !msg["update_time"].isUndefined() )
 				{
 					message->setStatusText("edited");
@@ -305,7 +322,7 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 							{
 								img_url = profile["photo_200"].toString();
 								message->photo = utils::getHashFromPhotoUrl( img_url );
-								message_avatar_loader.append(img_url, message->photo);
+								message_avatar_loader.append(img_url, message->photo, message);
 							}
 							break;
 						}
@@ -325,7 +342,7 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 							{
 								img_url = group["photo_200"].toString();
 								message->photo = utils::getHashFromPhotoUrl( img_url );
-								message_avatar_loader.append(img_url, message->photo);	
+								message_avatar_loader.append(img_url, message->photo, message);	
 							}
 							break;
 						}
@@ -337,6 +354,7 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 	}
 
 	message_avatar_loader.download();
+	message_attachment_loader.download();
 }
 
 DialogWidget *MessagesWindow::getDialogById(int peer_id)

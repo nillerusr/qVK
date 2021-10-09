@@ -29,6 +29,9 @@ public:
 	void setDateTime( QString datetime );
 	void setPhoto(QString filename);
 	void setStatusText( QString status );
+	
+	void addImageAttachment( QString filename );
+	
 	QString getText();
 	
 	int message_id;

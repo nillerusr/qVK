@@ -63,3 +63,13 @@ void messagewidget::setStatusText( QString status )
 {
 	ui->status->setText( status );
 }
+
+void messagewidget::addImageAttachment(QString filename)
+{
+	QPixmap pix(filename);
+	
+	QLabel *pic = new QLabel;
+	pic->setPixmap(pix);
+	
+	ui->attachments_layout->addWidget( pic );
+}

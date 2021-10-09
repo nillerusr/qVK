@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>395</width>
-    <height>71</height>
+    <height>271</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -201,7 +201,7 @@
           <property name="topMargin">
            <number>0</number>
           </property>
-          <item>
+          <item alignment="Qt::AlignTop">
            <widget class="WTextBrowser" name="message">
             <property name="enabled">
              <bool>true</bool>
@@ -214,8 +214,8 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>1</width>
-              <height>25</height>
+              <width>0</width>
+              <height>0</height>
              </size>
             </property>
             <property name="baseSize">
@@ -231,6 +231,13 @@
              <enum>Qt::ScrollBarAlwaysOff</enum>
             </property>
            </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="attachments_layout">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+           </layout>
           </item>
          </layout>
         </item>

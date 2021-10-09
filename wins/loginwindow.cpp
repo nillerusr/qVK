@@ -11,7 +11,7 @@ LoginWindow::LoginWindow(QWidget *parent) :
 	ui(new Ui::LoginWindow)
 {
 	ui->setupUi(this);
-	connect( &captcha_img_loader, SIGNAL(downloaded(QString, int)), SLOT(captcha_img_downloaded(QString, int)) );	
+	connect( &captcha_img_loader, SIGNAL(downloaded(QString, QWidget*, int)), SLOT(captcha_img_downloaded(QString, QWidget*, int)) );	
 	captcha_img_loader.setDownloadDirectory(".captcha");
 	
 	captchaImg = new QLabel(this);
@@ -26,17 +26,19 @@ LoginWindow::~LoginWindow()
 }
 
 
-void LoginWindow::captcha_img_downloaded(QString filename, int error)
+void LoginWindow::captcha_img_downloaded(QString filename, QWidget *widget, int error)
 {
 	Q_UNUSED(error);
 	// TODO: check for errors.
 	// Hmm, I should start redownload in DownloadManager class
 
+	QLabel *captcha_pic = qobject_cast<QLabel*>(widget);
+	
 	QPixmap pix;
 	if( pix.load(filename) )
 	{
-		captchaImg->setPixmap(pix);
-		captchaImg->setScaledContents(true);
+		captcha_pic->setPixmap(pix);
+		captcha_pic->setScaledContents(true);
 	}
 }
 
@@ -71,7 +73,7 @@ void LoginWindow::tryLogin()
 					ui->captchaLayout->addWidget(captchaEdit);
 					captchaEdit->show(); captchaImg->show();
 				}
-				captcha_img_loader.append(error["captcha_img"].toString(), error["captcha_sid"].toString());
+				captcha_img_loader.append(error["captcha_img"].toString(), error["captcha_sid"].toString(), captchaImg);
 				captcha_img_loader.download();
 			}
 			Msgbox.setText("Ошибка: "+error["error"].toString());
