@@ -11,7 +11,7 @@ LoginWindow::LoginWindow(QWidget *parent) :
 	ui(new Ui::LoginWindow)
 {
 	ui->setupUi(this);
-	connect( &captcha_img_loader, SIGNAL(downloaded(QString, QWidget*, int)), SLOT(captcha_img_downloaded(QString, QWidget*, int)) );	
+	connect( &captcha_img_loader, SIGNAL(downloaded(QString, download_info, int)), SLOT(captcha_img_downloaded(QString, download_info, int)) );	
 	captcha_img_loader.setDownloadDirectory(".captcha");
 	
 	captchaImg = new QLabel(this);
@@ -26,8 +26,13 @@ LoginWindow::~LoginWindow()
 }
 
 
-void LoginWindow::captcha_img_downloaded(QString filename, QWidget *widget, int error)
+void LoginWindow::captcha_img_downloaded(QString filename, download_info info, int error)
 {
+	if( !info.data || info.bDeleted )
+		return;
+	
+	QWidget *widget = (QWidget*)info.data;
+
 	Q_UNUSED(error);
 	// TODO: check for errors.
 	// Hmm, I should start redownload in DownloadManager class
@@ -51,8 +56,7 @@ void LoginWindow::tryLogin()
 
 	if( username.isEmpty() || passwd.isEmpty() )
 	{
-		Msgbox.setText("Ошибка: логин или пароль не введены !");
-		Msgbox.exec();
+
 	}
 	else
 	{

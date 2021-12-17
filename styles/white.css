@@ -18,8 +18,35 @@ WTextEdit
     padding-right: 8px; 
 }
 
+QLineEdit
+{
+    border: 1px solid rgb(166, 171, 182);
+    border-radius: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+QPushButton {
+    border: 1px solid #4A90D6;
+    border-radius: 15px;
+    padding: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    
+}
+
+QPushButton:hover {
+background-color: rgb(200, 200, 200);
+}
+
+QPushButton:pressed {
+background-color: rgb(160, 160, 160);
+}
+
 /*
-QScrollBar:horizontal
+ QScrollBar:horizontal
 {
     height: 15px;
     margin: 3px 15px 3px 15px;

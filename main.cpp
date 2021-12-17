@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	QFile style(":/styles/white.css");
 	style.open(QFile::ReadOnly);
 	a.setStyleSheet(style.readAll());
-	
+
 	if (jObj.contains("access_token"))
 	{
 		vkapi.init(jObj.value("access_token").toString(),  jObj.value("user_id").toInt());

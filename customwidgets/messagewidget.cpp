@@ -64,12 +64,33 @@ void messagewidget::setStatusText( QString status )
 	ui->status->setText( status );
 }
 
-void messagewidget::addImageAttachment(QString filename)
+void messagewidget::addImageAttachment(QSize size, int queue_id)
 {
-	QPixmap pix(filename);
+	QLabel *lab = new QLabel;
 	
-	QLabel *pic = new QLabel;
-	pic->setPixmap(pix);
+	QPixmap pixmap(size.width(), size.height());
+    {
+        QPainter p(&pixmap);
+		QPainterPath path;
+		path.addRect(0, 0, size.width(), size.height());
+		QPen pen(QColor(127, 127, 127));
+		p.setPen(pen);
+		p.fillPath(path, QColor(127, 127, 127));
+		p.drawPath(path);
+    }
 	
-	ui->attachments_layout->addWidget( pic );
+	images_map[queue_id] = lab;
+	
+	lab->setPixmap(pixmap);
+	ui->attachments_layout->addWidget( lab );
+}
+
+void messagewidget::setImageAttachment( QPixmap pix, int queue_id )
+{
+	QLabel *lab = images_map[queue_id];
+	if( lab )
+	{
+		images_map[queue_id] = nullptr;
+		lab->setPixmap(pix);
+	}
 }

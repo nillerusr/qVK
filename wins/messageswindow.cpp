@@ -1,4 +1,4 @@
-#include "messageswindow.h"
+ #include "messageswindow.h"
 #include "ui_messageswindow.h"
 #include <QObject>
 #include <QScroller>
@@ -11,6 +11,7 @@
 #include "customwidgets/dialogwidget.h"
 #include "customwidgets/wscrollarea.h"
 #include "wins/settingswindow.h"
+#include <unistd.h>
 
 MessagesWindow::MessagesWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -32,21 +33,24 @@ MessagesWindow::MessagesWindow(QWidget *parent) :
 	connect( ui->messageEdit, SIGNAL(sKeyPressEvent(QKeyEvent*)), SLOT(TextEditEvent(QKeyEvent*)));
 	connect( history_manager, SIGNAL(finished(QNetworkReply*)), SLOT(messageHistory(QNetworkReply*)));
 	connect( ui->messagesArea, SIGNAL(scrolledUp()), SLOT(loadupMessages()));
-	connect( &conversation_avatar_loader, SIGNAL(downloaded(QString, QWidget*, int)), SLOT(conversation_avatar_downloaded(QString, QWidget*, int)));
-	connect( &message_avatar_loader, SIGNAL(downloaded(QString, QWidget*, int)), SLOT(message_avatar_downloaded(QString, QWidget*, int)));
-	connect( &profile_avatar_loader, SIGNAL(downloaded(QString, QWidget*, int)), SLOT(profile_avatar_downloaded(QString, QWidget*, int)));
-	connect( &message_attachment_loader, SIGNAL(downloaded(QString, QWidget*, int)), SLOT(message_attachment_downloaded(QString, QWidget*, int)));
+	connect( &conversation_avatar_loader, SIGNAL(downloaded(QString, download_info, int)), SLOT(conversation_avatar_downloaded(QString, download_info, int)));
+	connect( &message_avatar_loader, SIGNAL(downloaded(QString, download_info, int)), SLOT(message_avatar_downloaded(QString, download_info, int)));
+	connect( &profile_avatar_loader, SIGNAL(downloaded(QString, download_info, int)), SLOT(profile_avatar_downloaded(QString, download_info, int)));
+	connect( &message_attachment_loader, SIGNAL(downloaded(QString, download_info, int)), SLOT(message_attachment_downloaded(QString, download_info, int)));
 
 	
 	connect( &longpoll, SIGNAL(Message_Delete(int,int)), SLOT(messageDeleted(int,int)));
 
+	
 	m_iCurDialogCount = 0;
 	m_iCurMessagesCount = 0;
 	m_iDialogCount = 0;
 	active_dialog = nullptr;
-	requestDialogs(10);
+	requestDialogs(30);
 	ui->messagesArea->m_bScrollDownNeed = true;
-	
+	ui->messagesLayout->setAlignment(Qt::AlignBottom);				
+	ui->messagesQueuedLayout->setAlignment(Qt::AlignBottom);
+
 	conversation_avatar_loader.setDownloadDirectory(".image_previews");
 	message_avatar_loader.setDownloadDirectory(".image_previews");
 	profile_avatar_loader.setDownloadDirectory(".image_previews");
@@ -62,29 +66,52 @@ MessagesWindow::~MessagesWindow()
 	delete ui;
 }
 
-void MessagesWindow::profile_avatar_downloaded( QString filename, QWidget *widget, int error )
+void MessagesWindow::profile_avatar_downloaded( QString filename, download_info info, int error )
 {
-	if( !widget )
+	if( !info.data || info.bDeleted )
 		return;
+	
+	QWidget *widget = (QWidget*)info.data;	
 	
 	QPixmap pix(filename);
 	qobject_cast<QLabel*>(widget)->setPixmap(pix);
 }
 
-void MessagesWindow::message_attachment_downloaded(QString filename, QWidget *widget, int error)
+void MessagesWindow::message_attachment_downloaded(QString filename, download_info info, int error)
 {
-	if( !widget )
+	if( !info.data )
 		return;
+
+	image_download_queue *download_queue = (image_download_queue*)info.data;		
+	messagewidget *message = download_queue->msg;		
 	
-	messagewidget *message = qobject_cast<messagewidget*>(widget);
-	message->addImageAttachment(filename);
+	if( info.bDeleted || !message )
+	{
+		delete download_queue;
+		return;
+	}
+	
+	QPixmap pix(filename);
+	int need_width = minimumWidth()-active_dialog->width()-ui->profilePhoto->width()-120;
+
+	if( pix.width() >= need_width )
+	{
+		float flScale = (float)need_width/pix.width();
+		pix = pix.scaled(pix.width()*flScale, pix.height()*flScale);
+	}
+
+	//ui->messagesArea->scrollContentsBy(0, pix.height());
+	
+	message->setImageAttachment(pix, download_queue->quque_id);
+	delete download_queue;
 }
 
-void MessagesWindow::conversation_avatar_downloaded(QString filename, QWidget *widget, int error)
+void MessagesWindow::conversation_avatar_downloaded(QString filename, download_info info, int error)
 {
-	if( !widget )
+	if( !info.data || info.bDeleted )
 		return;
 	
+	QWidget *widget = (QWidget*)info.data;
 	DialogWidget *d = qobject_cast<DialogWidget*>(widget);
 
 	QPixmap pix = QPixmap(filename);
@@ -94,10 +121,12 @@ void MessagesWindow::conversation_avatar_downloaded(QString filename, QWidget *w
 		ui->dialogIcon->setPixmap(pix);
 }
 
-void MessagesWindow::message_avatar_downloaded(QString filename, QWidget *widget, int error)
+void MessagesWindow::message_avatar_downloaded(QString filename, download_info info, int error)
 {
-	if( !widget )
+	if( !info.data || info.bDeleted )
 		return;
+
+	QWidget *widget = (QWidget*)info.data;	
 
 	QPixmap pix(filename);
 	messagewidget *m = qobject_cast<messagewidget*>(widget);
@@ -113,7 +142,7 @@ void MessagesWindow::resizeEvent(QResizeEvent *event)
 void MessagesWindow::resizeUpdate()
 {
 	if( ui->dialogsArea->isScrolledDown() && m_iCurDialogCount < m_iDialogCount )
-		requestDialogs(10, m_iCurDialogCount);
+		requestDialogs(30, m_iCurDialogCount);
 }
 
 void MessagesWindow::requestDialogs(int count, int offset)
@@ -132,7 +161,7 @@ void MessagesWindow::requestDialogs(int count, int offset)
 void MessagesWindow::loadupDialogs()
 {
 	if( m_iCurDialogCount < m_iDialogCount )
-		requestDialogs(10, m_iCurDialogCount);
+		requestDialogs(30, m_iCurDialogCount);
 }
 
 void MessagesWindow::addDialogs(QNetworkReply *reply)
@@ -218,7 +247,7 @@ void MessagesWindow::addDialogs(QNetworkReply *reply)
 		}
 
 		if( ui->dialogsArea->isScrolledDown() && m_iCurDialogCount < m_iDialogCount )
-			requestDialogs(10, m_iCurDialogCount);
+			requestDialogs(30, m_iCurDialogCount);
 	}
 	conversation_avatar_loader.download();
 }
@@ -241,6 +270,7 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 
 			if(bottom)
 			{
+				ui->messagesArea->m_bFuckedUp = true;				
 				ui->dialogsLayout->removeWidget(widget);
 				ui->dialogsLayout->insertWidget(0, widget);
 				widget->setLastMessageText(msg["text"].toString());
@@ -275,6 +305,8 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 					message->message_id = msg["id"].toInt();
 				}
 
+				int queue_id = 0;
+				
 				const QJsonArray attachments = msg["attachments"].toArray();
 				for( int i = 0; i < attachments.size(); i++ )
 				{
@@ -289,7 +321,26 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 							if( sizes[j]["type"].toString() == "x" )
 							{
 								QString url = sizes[j]["url"].toString();
-								message_attachment_loader.append(url, filename, message);
+								int height = sizes[j]["height"].toInt();
+								int width = sizes[j]["width"].toInt();
+								
+								int need_width = minimumWidth()-active_dialog->width()-ui->profilePhoto->width()-120;
+
+								if( width >= need_width )
+								{
+									float flScale = (float)need_width/width;
+									width *= flScale;
+									height *= flScale;
+								}
+								
+								image_download_queue *download_queue = new image_download_queue;
+								download_queue->quque_id = queue_id;
+								download_queue->msg = message;
+								
+								message->addImageAttachment(QSize(width, height), queue_id);
+								message_attachment_loader.append(url, filename, download_queue);
+								
+								queue_id++;
 							}
 						}
 						
@@ -303,12 +354,12 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 					msg_time = utils::TimestampToQStr(msg["update_time"].toInt());
 					message->setDateTime(msg_time);
 				}
-
+				
 				if(bottom)
 					ui->messagesLayout->addWidget(message);
 				else
 					ui->messagesLayout->insertWidget(0, message);
-
+				
 				if( from_id > 0 )
 				{
 					for( int j = 0; j < profiles.count(); j++)
@@ -321,8 +372,7 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 							if( !profile["photo_200"].isUndefined() )
 							{
 								img_url = profile["photo_200"].toString();
-								message->photo = utils::getHashFromPhotoUrl( img_url );
-								message_avatar_loader.append(img_url, message->photo, message);
+								message_avatar_loader.append(img_url, utils::getHashFromPhotoUrl( img_url ), message);
 							}
 							break;
 						}
@@ -341,8 +391,7 @@ void MessagesWindow::updateMessages(const QJsonObject messages, bool bottom)
 							if( !group["photo_200"].isUndefined() )
 							{
 								img_url = group["photo_200"].toString();
-								message->photo = utils::getHashFromPhotoUrl( img_url );
-								message_avatar_loader.append(img_url, message->photo, message);	
+								message_avatar_loader.append(img_url, utils::getHashFromPhotoUrl( img_url ), message);	
 							}
 							break;
 						}
@@ -373,6 +422,12 @@ void MessagesWindow::dialogSelected(DialogWidget *dialog)
 {
 	if( !dialog ) return;
 
+	if( active_dialog )
+	{
+		message_attachment_loader.freeDataInQueues();
+		profile_avatar_loader.freeDataInQueues();
+	}
+		
 	active_dialog = dialog;
 
 	utils::ClearLayout(ui->messagesLayout); // TODO: should I store this layout in memory ?
@@ -441,6 +496,7 @@ void MessagesWindow::sendMessage()
 	};
 
 	messagewidget *message = new messagewidget(this, vkapi.getUserName(), ui->messageEdit->toPlainText() , "In queue" );
+	ui->messagesArea->m_bFuckedUp = true;
 	ui->messagesQueuedLayout->addWidget(message);
 	message->setPhoto(".image_previews/"+profile_avatar);
 
@@ -524,10 +580,10 @@ void MessagesWindow::messageDeleted(int peer_id, int message_id)
 	}
 }
 
+
 void MessagesWindow::on_settingsButton_released()
 {
 	settingswindow *settings_win = new settingswindow(this);
     this->hide();
 	settings_win->show();
 }
-

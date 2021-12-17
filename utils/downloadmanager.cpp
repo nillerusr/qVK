@@ -12,39 +12,44 @@ DownloadManager::DownloadManager(QObject *parent) : QObject(parent)
 	bDownloading = false;
 }
 
-bool DownloadManager::FileAlreadyExists(const QString filename, QWidget *widget )
+bool DownloadManager::FileAlreadyExists(const QString filename, download_info info )
 {
 	QFile file(filename);
 	if( file.exists() )
 	{
-		emit downloaded(filename, {widget}, 0);
+		emit downloaded(filename, info, 0);
 		return true;
 	}
 	return false;
 }
 
-
-void DownloadManager::append(const QString url, const QString filename, QWidget *widget)
+void DownloadManager::append(const QString url, const QString filename, download_info info)
 {
-	if( FileAlreadyExists(download_dir+"/"+filename, widget) || queueExists(filename, widget) )
+	if( FileAlreadyExists(download_dir+"/"+filename, info) || queueExists(filename, info) )
 		return;
 
-	downloadQueue.enqueue({QUrl::fromEncoded(url.toLocal8Bit()), filename, {widget}});
+	downloadQueue.enqueue({QUrl::fromEncoded(url.toLocal8Bit()), filename, {info}});
 }
 
-bool DownloadManager::queueExists(const QString filename, QWidget *widget)
+bool DownloadManager::queueExists(const QString filename, download_info info)
 {
 	for( int i = 0; i < downloadQueue.length(); i++ )
 	{
 		if( downloadQueue[i].filename == filename )
 		{
-			downloadQueue[i].widgets.append( widget );
+			downloadQueue[i].data.append( info );
 			return true;
 		}
 	}
 	return false;
 }
 
+void DownloadManager::freeDataInQueues()
+{
+	for( int i = 0; i < downloadQueue.length(); i++ )
+		for( int j = 0; j < downloadQueue[i].data.length(); j++)
+			downloadQueue[i].data[j].bDeleted = true;
+}
 
 void DownloadManager::setDownloadDirectory( QString downdir )
 {
@@ -94,8 +99,8 @@ void DownloadManager::downloadFinished()
 {
 	output.close();	
 
-	for( QWidget *widget : current_item.widgets )
-		emit downloaded( output.fileName(), widget, 0);
+	for( download_info info : current_item.data )
+		emit downloaded( output.fileName(), info, 0);
 
 	startNextDownload();
 }

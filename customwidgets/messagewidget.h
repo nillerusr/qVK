@@ -2,6 +2,8 @@
 #define MESSAGEWIDGET_H
 
 #include <QFrame>
+#include <QMap>
+#include <QLabel>
 
 namespace Ui {
 	class messagewidget;
@@ -29,17 +31,27 @@ public:
 	void setDateTime( QString datetime );
 	void setPhoto(QString filename);
 	void setStatusText( QString status );
-	
-	void addImageAttachment( QString filename );
+	void addImageAttachment( QSize size, int queue_id );
+	void setImageAttachment( QPixmap pix, int queue_id );
 	
 	QString getText();
 	
 	int message_id;
-	QString photo;
 	message_status_e status;
 	
 private:
+	
+	QMap<int, QLabel*> images_map;
+//	void resizeEvent( QResizeEvent *event );
+	
 	Ui::messagewidget *ui;
 };
+
+struct image_download_queue
+{
+	messagewidget *msg;
+	int quque_id;
+};
+
 
 #endif // MESSAGEWIDGET_H

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>254</width>
-    <height>242</height>
+    <width>476</width>
+    <height>363</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,6 +22,12 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">#centralwidget
+{
+background-color: rgb(73, 91, 255);
+}</string>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
@@ -61,6 +67,10 @@
           <bold>true</bold>
          </font>
         </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(73, 91, 255);
+color: white;</string>
+        </property>
         <property name="text">
          <string>Авторизация</string>
         </property>
@@ -68,6 +78,10 @@
       </item>
       <item>
        <widget class="QLabel" name="label_2">
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(73, 91, 255);
+color: white;</string>
+        </property>
         <property name="text">
          <string>Логин</string>
         </property>
@@ -85,6 +99,10 @@
       </item>
       <item>
        <widget class="QLabel" name="label_3">
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(73, 91, 255);
+color: white;</string>
+        </property>
         <property name="text">
          <string>Пароль</string>
         </property>
@@ -117,6 +135,10 @@
         </property>
         <item>
          <widget class="QPushButton" name="cancelButton">
+          <property name="styleSheet">
+           <string notr="true">color: white; 
+background-color: rgb(23, 40, 140);</string>
+          </property>
           <property name="text">
            <string>Отмена</string>
           </property>
@@ -124,6 +146,10 @@
         </item>
         <item>
          <widget class="QPushButton" name="loginButton">
+          <property name="styleSheet">
+           <string notr="true">color: white; color: white; 
+background-color: rgb(23, 40, 140);</string>
+          </property>
           <property name="text">
            <string>Вход</string>
           </property>

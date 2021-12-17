@@ -56,10 +56,10 @@ private slots:
 	void messageHistory(QNetworkReply *reply);
 	void messageDeleted(int peer_id, int message_id);
 	
-	void conversation_avatar_downloaded(QString filename, QWidget *widget, int error);
-	void message_avatar_downloaded(QString filename, QWidget *widget, int error);
-	void profile_avatar_downloaded(QString filename, QWidget *widget, int error);
-	void message_attachment_downloaded(QString filename, QWidget *widget, int error);	
+	void conversation_avatar_downloaded(QString filename, download_info data, int error);
+	void message_avatar_downloaded(QString filename, download_info data, int error);
+	void profile_avatar_downloaded(QString filename, download_info data, int error);
+	void message_attachment_downloaded(QString filename, download_info data, int error);	
 	
 	void on_sendButton_released();
 	void TextEditEvent(QKeyEvent *event);

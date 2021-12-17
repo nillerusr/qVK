@@ -20,6 +20,7 @@ public:
 	bool m_bScrolledDown;
 	bool m_bScrollDownNeed;
 	bool m_bScrolledUp;
+	bool m_bFuckedUp;
 
 private:
 	int iMaxRange;
