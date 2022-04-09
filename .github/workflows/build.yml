@@ -67,7 +67,7 @@ jobs:
         qmake.exe -version
         #Write-Output (Get-Command mingw32-make.exe).Path
         #mingw32-make.exe -version
-    
+
     - name: Prepend path
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
@@ -79,13 +79,13 @@ jobs:
         qmake.exe -version
         #Write-Output (Get-Command mingw32-make.exe).Path
         #mingw32-make.exe -version
-        
+
     - name: Qmake and make
       working-directory: d:/a/qVK/qVK
-      run: | 
+      run: |
         qmake.exe physics-simulations.pro -spec win32-g++ "CONFIG+=release" "CONFIG+=release"
         mingw32-make.exe qmake_all
-        
+
     - name: Check QMake and make, g++
       run: |
         Write-Output (Get-Command qmake.exe).Path
@@ -94,16 +94,16 @@ jobs:
         mingw32-make.exe -version
         Write-Output (Get-Command g++).Path
         ls (Get-Command g++.exe).Path
-        g++.exe --version 
-        
+        g++.exe --version
+
     - name: Make mingw32
       working-directory: d:/a/qVK/qVK
       run: |
         mingw32-make.exe -j8
         mkdir package
-        cp release/physics-simulations.exe package/
+        cp release/vk-client.exe package/
         $env:PATH
-        windeployqt.exe --compiler-runtime package/physics-simulations.exe
+        windeployqt.exe --compiler-runtime package/vk-client.exe
         Get-Location
         ls
 
