@@ -4,7 +4,7 @@ env:
   QT_VERSION:     "5.12.7"
   MINGW_VERSION:  "win64_mingw73"
   MINGW_PATH:     "mingw73_64"
-  QT_TOOLS:       "tools_mingw qt.tools.win64_mingw730"
+  QT_TOOLS:       "tools_mingw,qt.tools.win64_mingw730"
 
 on:
   push:
@@ -24,18 +24,18 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - name: Check mingw g++ version
-      run: |
-        Write-Output (Get-Command g++.exe).Path
-        g++.exe --version
+#    - name: Check mingw g++ version
+#      run: |
+#        Write-Output (Get-Command g++.exe).Path
+#        g++.exe --version
 
-    - name: Uninstall correct version of mingw
-      run: |
-        choco uninstall mingw --force
-        choco uninstall strawberryperl --force
+#    - name: Uninstall mingw
+#      run: |
+#        choco uninstall mingw --force
+#        choco uninstall strawberryperl --force
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: LostGamerHL/install-qt-action@v3
       with:
         host: 'windows'
         target: 'desktop'
@@ -54,7 +54,7 @@ jobs:
         refreshenv
         #Write-Output (Get-Command g++.exe).Path
         #g++.exe --version
-
+        
     - name: Check availability of libraries
       working-directory: D:/a/qVK/Qt/${{ env.QT_VERSION }}/${{ env.MINGW_PATH }}/lib/
       run: |
@@ -67,7 +67,7 @@ jobs:
         qmake.exe -version
         #Write-Output (Get-Command mingw32-make.exe).Path
         #mingw32-make.exe -version
-
+    
     - name: Prepend path
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
@@ -79,13 +79,13 @@ jobs:
         qmake.exe -version
         #Write-Output (Get-Command mingw32-make.exe).Path
         #mingw32-make.exe -version
-
+        
     - name: Qmake and make
       working-directory: d:/a/qVK/qVK
-      run: |
+      run: | 
         qmake.exe physics-simulations.pro -spec win32-g++ "CONFIG+=release" "CONFIG+=release"
         mingw32-make.exe qmake_all
-
+        
     - name: Check QMake and make, g++
       run: |
         Write-Output (Get-Command qmake.exe).Path
@@ -94,8 +94,8 @@ jobs:
         mingw32-make.exe -version
         Write-Output (Get-Command g++).Path
         ls (Get-Command g++.exe).Path
-        g++.exe --version
-
+        g++.exe --version 
+        
     - name: Make mingw32
       working-directory: d:/a/qVK/qVK
       run: |
