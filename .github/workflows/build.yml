@@ -1,0 +1,118 @@
+name: CI
+
+env:
+  QT_VERSION:     "5.12.7"
+  MINGW_VERSION:  "win64_mingw73"
+  MINGW_PATH:     "mingw73_64"
+  QT_TOOLS:       "tools_mingw qt.tools.win64_mingw730"
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Print working directory on runner
+      run: Get-Location
+
+    - uses: actions/checkout@v2
+
+    - name: Check mingw g++ version
+      run: |
+        Write-Output (Get-Command g++.exe).Path
+        g++.exe --version
+
+    - name: Uninstall correct version of mingw
+      run: |
+        choco uninstall mingw --force
+        choco uninstall strawberryperl --force
+
+    - name: Check mingw directory
+      run: |
+        ls C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        host: 'windows'
+        target: 'desktop'
+        version: ${{ env.QT_VERSION }}
+        arch: ${{ env.MINGW_VERSION }}
+        tools: ${{ env.QT_TOOLS }}
+        #modules: 'qtcore'
+        extra: --external 7z
+
+    - name: Set path and refresh
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+      run: |
+        echo "::add-path::d:/a/qVK/Qt/${{ env.QT_VERSION }}/${{ env.MINGW_PATH }}/bin"
+        echo "::add-path::d:/a/qVK/Qt/Tools/mingw730_64/bin"
+        refreshenv
+        #Write-Output (Get-Command g++.exe).Path
+        #g++.exe --version
+
+    - name: Check availability of libraries
+      working-directory: D:/a/qVK/Qt/${{ env.QT_VERSION }}/${{ env.MINGW_PATH }}/lib/
+      run: |
+        ls
+        ls D:/a/qVK/Qt/${{ env.QT_VERSION }}/${{ env.MINGW_PATH }}/bin/
+
+    - name: Check QMake and make
+      run: |
+        Write-Output (Get-Command qmake.exe).Path
+        qmake.exe -version
+        #Write-Output (Get-Command mingw32-make.exe).Path
+        #mingw32-make.exe -version
+    
+    - name: Prepend path
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+      run: echo "::add-path::d:/a/qVK/Qt/${{ env.QT_VERSION }}/mingw73_32/bin"
+
+    - name: Check QMake and make after prepend path
+      run: |
+        Write-Output (Get-Command qmake.exe).Path
+        qmake.exe -version
+        #Write-Output (Get-Command mingw32-make.exe).Path
+        #mingw32-make.exe -version
+        
+    - name: Qmake and make
+      working-directory: d:/a/qVK/qVK
+      run: | 
+        qmake.exe physics-simulations.pro -spec win32-g++ "CONFIG+=release" "CONFIG+=release"
+        mingw32-make.exe qmake_all
+        
+    - name: Check QMake and make, g++
+      run: |
+        Write-Output (Get-Command qmake.exe).Path
+        qmake.exe -version
+        Write-Output (Get-Command mingw32-make.exe).Path
+        mingw32-make.exe -version
+        Write-Output (Get-Command g++).Path
+        ls (Get-Command g++.exe).Path
+        g++.exe --version 
+        
+    - name: Make mingw32
+      working-directory: d:/a/qVK/qVK
+      run: |
+        mingw32-make.exe -j8
+        mkdir package
+        cp release/physics-simulations.exe package/
+        $env:PATH
+        windeployqt.exe --compiler-runtime package/physics-simulations.exe
+        Get-Location
+        ls
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: result
+        path: package/
