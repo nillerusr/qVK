@@ -34,10 +34,6 @@ jobs:
         choco uninstall mingw --force
         choco uninstall strawberryperl --force
 
-    - name: Check mingw directory
-      run: |
-        ls C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin
-
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
