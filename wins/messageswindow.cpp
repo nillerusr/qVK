@@ -11,7 +11,6 @@
 #include "customwidgets/dialogwidget.h"
 #include "customwidgets/wscrollarea.h"
 #include "wins/settingswindow.h"
-#include <unistd.h>
 
 MessagesWindow::MessagesWindow(QWidget *parent) :
 	QMainWindow(parent),
