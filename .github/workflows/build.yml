@@ -83,7 +83,7 @@ jobs:
     - name: Qmake and make
       working-directory: d:/a/qVK/qVK
       run: | 
-        qmake.exe physics-simulations.pro -spec win32-g++ "CONFIG+=release" "CONFIG+=release"
+        qmake.exe qVK.pro -spec win32-g++ "CONFIG+=release" "CONFIG+=release"
         mingw32-make.exe qmake_all
         
     - name: Check QMake and make, g++
@@ -101,9 +101,9 @@ jobs:
       run: |
         mingw32-make.exe -j8
         mkdir package
-        cp release/vk-client.exe package/
+        cp release/qVK.exe package/
         $env:PATH
-        windeployqt.exe --compiler-runtime package/vk-client.exe
+        windeployqt.exe --compiler-runtime package/qVK.exe
         Get-Location
         ls
 
