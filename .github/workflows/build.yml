@@ -1,7 +1,7 @@
 name: CI
 
 env:
-  QT_VERSION:     "5.12.7"
+  QT_VERSION:     "5.15.6"
   MINGW_VERSION:  "win64_mingw73"
   MINGW_PATH:     "mingw73_64"
   QT_TOOLS:       "tools_mingw,qt.tools.win64_mingw730"
