@@ -3,7 +3,7 @@ name: CI
 env:
   QT_VERSION:     "5.15.1"
   MINGW_VERSION:  "win64_msvc2019_64"
-  #QT_TOOLS:       "tools_mingw,qt.tools.win64_mingw730"
+  QT_TOOLS:       "tools_openssl_x64"
 
 on:
   push:
@@ -40,7 +40,7 @@ jobs:
         target: 'desktop'
         version: ${{ env.QT_VERSION }}
         arch: ${{ env.MINGW_VERSION }}
-        #tools: ${{ env.QT_TOOLS }}
+        tools: ${{ env.QT_TOOLS }}
         #modules: 'qtcore'
         extra: --external 7z
 
@@ -49,7 +49,12 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       run: |
         echo "::add-path::d:/a/qVK/Qt/${{ env.QT_VERSION }}/${{ env.MINGW_PATH }}/bin"
-        #echo "::add-path::d:/a/qVK/Qt/Tools/mingw730_64/bin"
+        ls d:/a/qVK/Qt/
+        ls d:/a/qVK/Qt/Tools/
+        ls d:/a/qVK/Qt/Tools/OpenSSL/Win_x64/
+        ls d:/a/qVK/Qt/Tools/OpenSSL/Win_x64/bin
+        ls d:/a/qVK/Qt/Tools/OpenSSL/Win_x64/lib
+        echo "::add-path::d:/a/qVK/Qt/Tools/OpenSSL/Win_x64/bin"
         refreshenv
         #Write-Output (Get-Command g++.exe).Path
         #g++.exe --version
@@ -84,10 +89,10 @@ jobs:
     - name: Make mingw32
       working-directory: d:/a/qVK/qVK
       run: |
-        mingw32-make.exe -j8
         mkdir package
         cp release/qVK.exe package/
         $env:PATH
+        cp d:/a/qVK/Qt/Tools/OpenSSL/Win_x64/bin/*.dll package/
         windeployqt.exe --compiler-runtime package/qVK.exe
         Get-Location
         ls
