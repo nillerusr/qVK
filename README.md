@@ -1,16 +1,18 @@
 # qVK
 
 Source code of client for the [vk](https://vk.com) social network
-written in c++ using Qt framework.
+Written in c++ using Qt framework.
+
+![screenshot](https://raw.githubusercontent.com/nillerusr/qVK/master/screenshot.png)
 
 ### Building
 
 ```sh
 # Clone repo
 git clone https://github.com/nillerusr/qVK
+mkdir build
 # Generate Makefile
-qmake
+qmake ../
 # Build
 make -j$(nproc --all)
 ```
-
