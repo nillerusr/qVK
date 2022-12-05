@@ -1,10 +1,9 @@
 name: CI
 
 env:
-  QT_VERSION:     "5.15.6"
-  MINGW_VERSION:  "win64_mingw73"
-  MINGW_PATH:     "mingw73_64"
-  QT_TOOLS:       "tools_mingw,qt.tools.win64_mingw730"
+  QT_VERSION:     "5.15.1"
+  MINGW_VERSION:  "win64_msvc2019_64"
+  #QT_TOOLS:       "tools_mingw,qt.tools.win64_mingw730"
 
 on:
   push:
@@ -16,7 +15,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     steps:
     - name: Print working directory on runner
@@ -41,7 +40,7 @@ jobs:
         target: 'desktop'
         version: ${{ env.QT_VERSION }}
         arch: ${{ env.MINGW_VERSION }}
-        tools: ${{ env.QT_TOOLS }}
+        #tools: ${{ env.QT_TOOLS }}
         #modules: 'qtcore'
         extra: --external 7z
 
@@ -50,16 +49,10 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       run: |
         echo "::add-path::d:/a/qVK/Qt/${{ env.QT_VERSION }}/${{ env.MINGW_PATH }}/bin"
-        echo "::add-path::d:/a/qVK/Qt/Tools/mingw730_64/bin"
+        #echo "::add-path::d:/a/qVK/Qt/Tools/mingw730_64/bin"
         refreshenv
         #Write-Output (Get-Command g++.exe).Path
         #g++.exe --version
-        
-    - name: Check availability of libraries
-      working-directory: D:/a/qVK/Qt/${{ env.QT_VERSION }}/${{ env.MINGW_PATH }}/lib/
-      run: |
-        ls
-        ls D:/a/qVK/Qt/${{ env.QT_VERSION }}/${{ env.MINGW_PATH }}/bin/
 
     - name: Check QMake and make
       run: |
@@ -67,35 +60,27 @@ jobs:
         qmake.exe -version
         #Write-Output (Get-Command mingw32-make.exe).Path
         #mingw32-make.exe -version
-    
-    - name: Prepend path
-      env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-      run: echo "::add-path::d:/a/qVK/Qt/${{ env.QT_VERSION }}/mingw73_32/bin"
 
-    - name: Check QMake and make after prepend path
+#    - name: Prepend path
+#      env:
+#        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+#      run: echo "::add-path::d:/a/qVK/Qt/${{ env.QT_VERSION }}/mingw73_32/bin"
+
+    - name: Check QMake
       run: |
         Write-Output (Get-Command qmake.exe).Path
         qmake.exe -version
-        #Write-Output (Get-Command mingw32-make.exe).Path
-        #mingw32-make.exe -version
-        
-    - name: Qmake and make
+
+    - name: Add vc to PATH
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Qmake
       working-directory: d:/a/qVK/qVK
-      run: | 
-        qmake.exe qVK.pro -spec win32-g++ "CONFIG+=release" "CONFIG+=release"
-        mingw32-make.exe qmake_all
-        
-    - name: Check QMake and make, g++
       run: |
-        Write-Output (Get-Command qmake.exe).Path
-        qmake.exe -version
-        Write-Output (Get-Command mingw32-make.exe).Path
-        mingw32-make.exe -version
-        Write-Output (Get-Command g++).Path
-        ls (Get-Command g++.exe).Path
-        g++.exe --version 
-        
+        qmake.exe qVK.pro "CONFIG+=release" "CONFIG+=release"
+        dir
+        nmake.exe
+
     - name: Make mingw32
       working-directory: d:/a/qVK/qVK
       run: |
